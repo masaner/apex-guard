@@ -7,7 +7,7 @@
     "lint": "eslint force-app",
     "prettier": "prettier --write \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"config/*.json\"",
     "prettier:verify": "prettier --check \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"config/*.json\"",
-    "test:apex": "sf apex run test --code-coverage --result-format human --wait 10"
+    "test:apex": "sf apex run test --suite-names ApexGuard --code-coverage --result-format human --wait 10"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

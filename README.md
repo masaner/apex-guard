@@ -159,29 +159,32 @@ Contributors can extend validators, execution-context adapters, or tests cleanly
 <summary><strong>Click to expand repository structure</strong></summary>
 
 ```text
-force-app/main/default/classes/
-├── core/
-│   ├── Guard.cls                     # Single public static facade + pass-through signatures
-│   └── GuardRecord.cls               # Non-throwing fluent SObject.addError() builder for Triggers
-├── context/
-│   ├── GuardContext.cls              # Quiddity & Trigger runtime detection + LwcScope + dispatch
-│   └── IGuardFailureHandler.cls      # Global failure hook interface (Nebula Logger, telemetry)
-├── exceptions/
-│   └── GuardException.cls            # Structured exception (paramName, errorCode, toMap())
-├── validators/
-│   ├── GuardObjectValidator.cls      # Nullability & Boolean assertions
-│   ├── GuardStringValidator.cls      # Empty, Blank, Exact/Max Length, Regex
-│   ├── GuardNumericValidator.cls     # Greater/Less Than, Range, NotZero (Decimal/Integer/Long)
-│   ├── GuardCollectionValidator.cls  # List, Set (Id/String/Integer/Object), Map overloads
-│   ├── GuardSObjectValidator.cls     # isValidId, isIdOfType, isSObjectType, hasPopulatedField
-│   └── GuardSchemaValidator.cls      # Opt-in running-user CRUD & FLS guards
-├── invocable/
-│   └── GuardFlowAction.cls           # Bulkified @InvocableMethod for Flows & Agentforce
-└── tests/
-    ├── GuardTest.cls                 # Core validators, boundary cases, custom exceptions, runAs CRUD/FLS
-    ├── GuardContextTest.cls          # Quiddity.AURA, LwcScope, REST/Async metadata, hooks
-    ├── GuardRecordTest.cls           # Partial DML, field addError(), skipInaccessible(), isSet() safety
-    └── GuardFlowActionTest.cls       # Bulk requests, Flow Fault paths, Decision outputs
+force-app/main/default/
+├── classes/
+│   ├── core/
+│   │   ├── Guard.cls                     # Single public static facade + pass-through signatures
+│   │   └── GuardRecord.cls               # Non-throwing fluent SObject.addError() builder for Triggers
+│   ├── context/
+│   │   ├── GuardContext.cls              # Quiddity & Trigger runtime detection + LwcScope + dispatch
+│   │   └── IGuardFailureHandler.cls      # Global failure hook interface (Nebula Logger, telemetry)
+│   ├── exceptions/
+│   │   └── GuardException.cls            # Structured exception (paramName, errorCode, toMap())
+│   ├── validators/
+│   │   ├── GuardObjectValidator.cls      # Nullability & Boolean assertions
+│   │   ├── GuardStringValidator.cls      # Empty, Blank, Exact/Max Length, Regex
+│   │   ├── GuardNumericValidator.cls     # Greater/Less Than, Range, NotZero (Decimal/Integer/Long)
+│   │   ├── GuardCollectionValidator.cls  # List, Set (Id/String/Integer/Object), Map overloads
+│   │   ├── GuardSObjectValidator.cls     # isValidId, isIdOfType, isSObjectType, hasPopulatedField
+│   │   └── GuardSchemaValidator.cls      # Opt-in running-user CRUD & FLS guards
+│   ├── invocable/
+│   │   └── GuardFlowAction.cls           # Bulkified @InvocableMethod for Flows & Agentforce
+│   └── tests/
+│       ├── GuardTest.cls                 # Core validators, boundary cases, custom exceptions, runAs CRUD/FLS
+│       ├── GuardContextTest.cls          # Quiddity.AURA, LwcScope, REST/Async metadata, hooks
+│       ├── GuardRecordTest.cls           # Partial DML, field addError(), skipInaccessible(), isSet() safety
+│       └── GuardFlowActionTest.cls       # Bulk requests, Flow Fault paths, Decision outputs
+└── testSuites/
+    └── ApexGuard.testSuite-meta.xml      # Salesforce ApexTestSuite bundling all ApexGuard test classes
 ```
 
 </details>
@@ -200,9 +203,9 @@ cd apex-guard
 # 2. Deploy all classes to your Scratch Org or Sandbox
 sf project deploy start --source-dir force-app --target-org my-org
 
-# 3. Verify all 25 unit tests and code coverage
+# 3. Verify all 25 unit tests and code coverage using the ApexGuard ApexTestSuite
 sf apex run test \
-  --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest \
+  --suite-names ApexGuard \
   --code-coverage \
   --result-format human \
   --wait 10 \

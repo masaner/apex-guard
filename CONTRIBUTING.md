@@ -5,13 +5,16 @@ Thank you for helping make defensive Apex programming cleaner, faster, and more 
 ## Architecture & Directory Layout
 
 ```text
-force-app/main/default/classes/
-├── core/        # Public Guard.cls facade and GuardRecord.cls Trigger builder
-├── context/     # GuardContext.cls runtime router and IGuardFailureHandler.cls interface
-├── exceptions/  # GuardException.cls structured exception & error code constants
-├── validators/  # Modular domain validators (Object, String, Numeric, Collection, SObject)
-├── invocable/   # GuardFlowAction.cls for Flows and Agentforce
-└── tests/       # @IsTest unit test suites
+force-app/main/default/
+├── classes/
+│   ├── core/        # Public Guard.cls facade and GuardRecord.cls Trigger builder
+│   ├── context/     # GuardContext.cls runtime router and IGuardFailureHandler.cls interface
+│   ├── exceptions/  # GuardException.cls structured exception & error code constants
+│   ├── validators/  # Modular domain validators (Object, String, Numeric, Collection, SObject, Schema)
+│   ├── invocable/   # GuardFlowAction.cls for Flows and Agentforce
+│   └── tests/       # @IsTest unit test classes
+└── testSuites/
+    └── ApexGuard.testSuite-meta.xml  # ApexTestSuite registering every *Test.cls class
 ```
 
 Separating validators by type keeps pull requests isolated and minimizes merge conflicts.
@@ -50,7 +53,7 @@ Delegate from [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) with 
 If the guard accepts scalar Flow-compatible inputs (`String`, `Decimal`, `Boolean`, `SObject`), add the rule constant to `GuardFlowAction.executeRule(...)` and update the `@InvocableVariable` description on `GuardFlowAction.Request.rule`.
 
 ### Step 5: Write Comprehensive Unit Tests
-Add `@IsTest` coverage in `force-app/main/default/classes/tests/` testing:
+Add `@IsTest` coverage in `force-app/main/default/classes/tests/` (and register any new test class in [`ApexGuard.testSuite-meta.xml`](force-app/main/default/testSuites/ApexGuard.testSuite-meta.xml)) testing:
 - Happy path and pass-through return value
 - Boundary and null inputs
 - Default error message and `GuardException.getErrorCode()`
@@ -65,9 +68,11 @@ Update the API Quick-Reference table in [README.md](README.md).
 ## Submitting a Pull Request
 
 1. Format code with Prettier (`npm run prettier:verify` if installed locally).
-2. Run all Apex tests in a scratch org or sandbox:
+2. Run the full `ApexGuard` test suite in a scratch org or sandbox:
    ```bash
-   sf apex run test --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest --code-coverage --result-format human --wait 10
+   sf apex run test --suite-names ApexGuard --code-coverage --result-format human --wait 10
    ```
+   *(Or via npm: `npm run test:apex`)*
 3. Ensure >95% code coverage on every modified class and zero regressions.
-4. Fill out the [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md).
+4. Ensure any new `*Test.cls` class is added to [`ApexGuard.testSuite-meta.xml`](force-app/main/default/testSuites/ApexGuard.testSuite-meta.xml) (enforced by CI).
+5. Fill out the [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md).

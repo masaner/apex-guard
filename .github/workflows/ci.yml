@@ -34,15 +34,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Validate sfdx-project.json and Apex meta XML companions
+      - name: Validate sfdx-project.json, Apex meta XML companions, and ApexTestSuite
         run: |
           node -e "
             const fs = require('fs');
+            const path = require('path');
             const cfg = JSON.parse(fs.readFileSync('sfdx-project.json', 'utf8'));
             if (!cfg.packageDirectories || !cfg.sourceApiVersion) {
               throw new Error('Invalid sfdx-project.json');
             }
             console.log('Validated sfdx-project.json (API v' + cfg.sourceApiVersion + ')');
+
+            const suitePath = path.join('force-app', 'main', 'default', 'testSuites', 'ApexGuard.testSuite-meta.xml');
+            if (!fs.existsSync(suitePath)) {
+              throw new Error('Missing ApexTestSuite metadata: ' + suitePath);
+            }
+            const suiteXml = fs.readFileSync(suitePath, 'utf8');
+            const suiteMembers = new Set(
+              Array.from(suiteXml.matchAll(/<testClassName>\s*([A-Za-z0-9_]+)\s*<\/testClassName>/g), (m) => m[1])
+            );
+            const testsDir = path.join('force-app', 'main', 'default', 'classes', 'tests');
+            const testClasses = fs
+              .readdirSync(testsDir)
+              .filter((file) => file.endsWith('Test.cls'))
+              .map((file) => file.replace(/\.cls$/, ''));
+            const missingFromSuite = testClasses.filter((cls) => !suiteMembers.has(cls));
+            if (missingFromSuite.length > 0) {
+              throw new Error('ApexTestSuite ApexGuard is missing test classes: ' + missingFromSuite.join(', '));
+            }
+            console.log('Validated ApexGuard.testSuite-meta.xml covers all ' + testClasses.length + ' test classes.');
           "
           missing=0
           while IFS= read -r cls; do
@@ -66,4 +86,4 @@ jobs:
           sf org login sfdx-url --sfdx-url-file sfdx-auth.txt --alias ci-org --set-default
           rm -f sfdx-auth.txt
           sf project deploy start --source-dir force-app --target-org ci-org --wait 10
-          sf apex run test --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest --code-coverage --result-format human --wait 10 --target-org ci-org
+          sf apex run test --suite-names ApexGuard --code-coverage --result-format human --wait 10 --target-org ci-org
