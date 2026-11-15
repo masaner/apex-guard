@@ -53,21 +53,17 @@ jobs:
           done < <(find force-app -type f -name '*.cls')
           exit "$missing"
 
-      - name: Install Salesforce CLI (if org secret configured)
-        if: ${{ secrets.SFDX_AUTH_URL != '' }}
-        run: npm install -g @salesforce/cli
-
-      - name: Authenticate target Salesforce org
-        if: ${{ secrets.SFDX_AUTH_URL != '' }}
+      - name: Deploy & run Apex tests in target org (optional)
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
         run: |
+          if [ -z "$SFDX_AUTH_URL" ]; then
+            echo "Skipping org deploy and Apex tests: SFDX_AUTH_URL secret is not configured."
+            exit 0
+          fi
+          npm install -g @salesforce/cli
           printf '%s' "$SFDX_AUTH_URL" > sfdx-auth.txt
           sf org login sfdx-url --sfdx-url-file sfdx-auth.txt --alias ci-org --set-default
           rm -f sfdx-auth.txt
-
-      - name: Deploy & run Apex tests in target org
-        if: ${{ secrets.SFDX_AUTH_URL != '' }}
-        run: |
           sf project deploy start --source-dir force-app --target-org ci-org --wait 10
           sf apex run test --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest --code-coverage --result-format human --wait 10 --target-org ci-org
