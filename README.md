@@ -598,6 +598,7 @@ Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 te
 
 | Guide | Topics Covered |
 | :--- | :--- |
+| [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod) |
 | [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
 | [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |
 | [Project Roadmap](ROADMAP.md) | Phase 1 completion checklist + **Phase 2 plans** (Python `apex-guard-codemod` static-analysis CLI, specialized Flow actions, Nebula Logger adapter) |
