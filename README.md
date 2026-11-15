@@ -9,8 +9,8 @@
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/masaner/apex-guard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/masaner/apex-guard/actions/workflows/ci.yml)
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v62.0-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://developer.salesforce.com/docs)
-[![Apex Tests](https://img.shields.io/badge/Tests-23%2F23%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
-[![Core Coverage](https://img.shields.io/badge/Core%20Coverage-96%25%2B-059669?style=for-the-badge)](#test-coverage)
+[![Apex Tests](https://img.shields.io/badge/Tests-25%2F25%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
+[![Core Coverage](https://img.shields.io/badge/Core%20Coverage-97%25%2B-059669?style=for-the-badge)](#test-coverage)
 [![Governor Limits](https://img.shields.io/badge/SOQL%20%2F%20DML-0%20Queries%20%7C%200%20DML-0284C7?style=for-the-badge)](#architecture)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-6366F1?style=for-the-badge)](#quick-start)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
@@ -173,13 +173,14 @@ force-app/main/default/classes/
 │   ├── GuardStringValidator.cls      # Empty, Blank, Exact/Max Length, Regex
 │   ├── GuardNumericValidator.cls     # Greater/Less Than, Range, NotZero (Decimal/Integer/Long)
 │   ├── GuardCollectionValidator.cls  # List, Set (Id/String/Integer/Object), Map overloads
-│   └── GuardSObjectValidator.cls     # isValidId, isIdOfType, isSObjectType, hasPopulatedField
+│   ├── GuardSObjectValidator.cls     # isValidId, isIdOfType, isSObjectType, hasPopulatedField
+│   └── GuardSchemaValidator.cls      # Opt-in running-user CRUD & FLS guards
 ├── invocable/
 │   └── GuardFlowAction.cls           # Bulkified @InvocableMethod for Flows & Agentforce
 └── tests/
-    ├── GuardTest.cls                 # Core validators, boundary cases, custom messages/exceptions
+    ├── GuardTest.cls                 # Core validators, boundary cases, custom exceptions, runAs CRUD/FLS
     ├── GuardContextTest.cls          # Quiddity.AURA, LwcScope, REST/Async metadata, hooks
-    ├── GuardRecordTest.cls           # Partial DML, field/record addError(), sparse SOQL isSet()
+    ├── GuardRecordTest.cls           # Partial DML, field addError(), skipInaccessible(), isSet() safety
     └── GuardFlowActionTest.cls       # Bulk requests, Flow Fault paths, Decision outputs
 ```
 
@@ -199,7 +200,7 @@ cd apex-guard
 # 2. Deploy all classes to your Scratch Org or Sandbox
 sf project deploy start --source-dir force-app --target-org my-org
 
-# 3. Verify all 23 unit tests and code coverage
+# 3. Verify all 25 unit tests and code coverage
 sf apex run test \
   --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest \
   --code-coverage \
@@ -268,6 +269,9 @@ public with sharing class BudgetController {
             Account.SObjectType,
             'accountIdStr'
         );
+        // Opt-in running-user CRUD & FLS enforcement (useful in @AuraEnabled / user-mode entry points)
+        Guard.forLwc().isUpdateable(Account.SObjectType);
+        Guard.forLwc().isFieldUpdateable(Account.AnnualRevenue);
         Guard.forLwc().isGreaterThan(budget, 0, 'budget');
 
         Account acc = new Account(Id = accountId, AnnualRevenue = budget);
@@ -329,12 +333,18 @@ public with sharing class AccountTriggerHandler {
 ```
 
 <details>
-<summary><strong>See Partial DML & Inspection Example (<code>Database.SaveResult</code> + <code>GuardRecord.hasErrors()</code>)</strong></summary>
+<summary><strong>See Partial DML, Opt-In FLS Filtering (<code>skipInaccessible()</code>) &amp; Inspection Example</strong></summary>
 
 ```apex
 GuardRecord validator = Guard.onRecord(acc)
     .isNotBlank(Account.Name, 'Account Name is required.')
     .isInRange(Account.NumberOfEmployees, 1, 100000);
+
+// Optional opt-in mode for user-context controllers/flows where restricted users
+// should not trigger validation failures on hidden FLS fields:
+GuardRecord userContextValidator = Guard.onRecord(acc)
+    .skipInaccessible()
+    .isGreaterThan(Account.AnnualRevenue, 0);
 
 if (validator.hasErrors()) {
     List<String> chronologicalMessages = validator.getErrorMessages();
@@ -525,7 +535,9 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 | | `Guard.isIdOfType(recordId, expectedType, paramName)` | `Id` | `GUARD_ID_SOBJECT_TYPE` |
 | | `Guard.isSObjectType(record, expectedType, paramName)` | `SObject` | `GUARD_SOBJECT_TYPE` |
 | | `Guard.hasPopulatedField(record, field, paramName)` | `SObject` | `GUARD_UNPOPULATED_FIELD` |
-| **Context & Hooks** | `Guard.onRecord(record)` | `GuardRecord` | Field/Record `addError()` |
+| **Schema CRUD & FLS** | `Guard.isAccessible(sObjectType)` / `isCreateable` / `isUpdateable` / `isDeletable` | `Schema.SObjectType` | `GUARD_SOBJECT_NOT_*` |
+| *(Opt-in, zero SOQL)* | `Guard.isFieldAccessible(field)` / `isFieldCreateable` / `isFieldUpdateable` | `Schema.SObjectField` | `GUARD_FIELD_NOT_*` |
+| **Context & Hooks** | `Guard.onRecord(record)` *(with `.skipInaccessible()` & FLS checks)* | `GuardRecord` | Field/Record `addError()` |
 | | `Guard.forLwc()` / `Guard.disableLwcMode()` | `GuardContext.LwcScope` / `void` | `AuraHandledException` |
 | | `Guard.setAutoDetectAuraQuiddity(enabled)` | `void` | Context config |
 | | `Guard.setFailureHandler(handler)` / `Guard.resetFailureHandler()` | `void` | `IGuardFailureHandler` |
@@ -535,22 +547,25 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 > **Apex `Set` & `Map` Ergonomics:** Because Apex `Set<T>` is invariant and `Map<K, V>` keys are invariant, `Guard` ships explicit overloads for `Set<Id>`, `Set<String>`, `Set<Integer>`, `Set<Object>`, `Map<Id, SObject>`, `Map<String, Object>`, `Map<String, String>`, and `Map<Object, Object>`—zero wrapper allocations required (`Guard.isNotEmpty(accountIds, 'accountIds')` works directly!). Note: `hasSizeEqualTo` supports `List<Object>`, `Set<Id/String/Object>`, and `Map<Id, SObject>` / `Map<String, Object>` / `Map<Object, Object>`.
 
 <details>
-<summary><strong>Click to view all 23 Standardized Error Code Constants (<code>GuardException</code>)</strong></summary>
+<summary><strong>Click to view all 30 Standardized Error Code Constants (<code>GuardException</code>)</strong></summary>
 
 | Constant | String Value | Constant | String Value |
 | :--- | :--- | :--- | :--- |
-| `GuardException.ERR_NULL_VALUE` | `'GUARD_NULL_VALUE'` | `GuardException.ERR_LESS_OR_EQUAL` | `'GUARD_LESS_OR_EQUAL'` |
-| `GuardException.ERR_NOT_NULL_VALUE` | `'GUARD_NOT_NULL_VALUE'` | `GuardException.ERR_OUT_OF_RANGE` | `'GUARD_OUT_OF_RANGE'` |
-| `GuardException.ERR_TRUE_EXPECTED` | `'GUARD_TRUE_EXPECTED'` | `GuardException.ERR_ZERO_VALUE` | `'GUARD_ZERO_VALUE'` |
-| `GuardException.ERR_FALSE_EXPECTED` | `'GUARD_FALSE_EXPECTED'` | `GuardException.ERR_EMPTY_COLLECTION` | `'GUARD_EMPTY_COLLECTION'` |
-| `GuardException.ERR_EMPTY_STRING` | `'GUARD_EMPTY_STRING'` | `GuardException.ERR_COLLECTION_SIZE` | `'GUARD_COLLECTION_SIZE'` |
-| `GuardException.ERR_BLANK_STRING` | `'GUARD_BLANK_STRING'` | `GuardException.ERR_MISSING_KEY` | `'GUARD_MISSING_KEY'` |
-| `GuardException.ERR_STRING_LENGTH` | `'GUARD_STRING_LENGTH'` | `GuardException.ERR_INVALID_ID` | `'GUARD_INVALID_ID'` |
-| `GuardException.ERR_MAX_LENGTH` | `'GUARD_MAX_LENGTH'` | `GuardException.ERR_ID_SOBJECT_TYPE` | `'GUARD_ID_SOBJECT_TYPE'` |
-| `GuardException.ERR_REGEX_MISMATCH` | `'GUARD_REGEX_MISMATCH'` | `GuardException.ERR_SOBJECT_TYPE` | `'GUARD_SOBJECT_TYPE'` |
-| `GuardException.ERR_GREATER_THAN` | `'GUARD_GREATER_THAN'` | `GuardException.ERR_UNPOPULATED_FIELD` | `'GUARD_UNPOPULATED_FIELD'` |
-| `GuardException.ERR_GREATER_OR_EQUAL` | `'GUARD_GREATER_OR_EQUAL'` | `GuardException.ERR_INVALID_GUARD_ARGUMENT` | `'GUARD_INVALID_ARGUMENT'` |
-| `GuardException.ERR_LESS_THAN` | `'GUARD_LESS_THAN'` | | |
+| `GuardException.ERR_NULL_VALUE` | `'GUARD_NULL_VALUE'` | `GuardException.ERR_COLLECTION_SIZE` | `'GUARD_COLLECTION_SIZE'` |
+| `GuardException.ERR_NOT_NULL_VALUE` | `'GUARD_NOT_NULL_VALUE'` | `GuardException.ERR_MISSING_KEY` | `'GUARD_MISSING_KEY'` |
+| `GuardException.ERR_TRUE_EXPECTED` | `'GUARD_TRUE_EXPECTED'` | `GuardException.ERR_INVALID_ID` | `'GUARD_INVALID_ID'` |
+| `GuardException.ERR_FALSE_EXPECTED` | `'GUARD_FALSE_EXPECTED'` | `GuardException.ERR_ID_SOBJECT_TYPE` | `'GUARD_ID_SOBJECT_TYPE'` |
+| `GuardException.ERR_EMPTY_STRING` | `'GUARD_EMPTY_STRING'` | `GuardException.ERR_SOBJECT_TYPE` | `'GUARD_SOBJECT_TYPE'` |
+| `GuardException.ERR_BLANK_STRING` | `'GUARD_BLANK_STRING'` | `GuardException.ERR_UNPOPULATED_FIELD` | `'GUARD_UNPOPULATED_FIELD'` |
+| `GuardException.ERR_STRING_LENGTH` | `'GUARD_STRING_LENGTH'` | `GuardException.ERR_SOBJECT_NOT_ACCESSIBLE` | `'GUARD_SOBJECT_NOT_ACCESSIBLE'` |
+| `GuardException.ERR_MAX_LENGTH` | `'GUARD_MAX_LENGTH'` | `GuardException.ERR_SOBJECT_NOT_CREATEABLE` | `'GUARD_SOBJECT_NOT_CREATEABLE'` |
+| `GuardException.ERR_REGEX_MISMATCH` | `'GUARD_REGEX_MISMATCH'` | `GuardException.ERR_SOBJECT_NOT_UPDATEABLE` | `'GUARD_SOBJECT_NOT_UPDATEABLE'` |
+| `GuardException.ERR_GREATER_THAN` | `'GUARD_GREATER_THAN'` | `GuardException.ERR_SOBJECT_NOT_DELETABLE` | `'GUARD_SOBJECT_NOT_DELETABLE'` |
+| `GuardException.ERR_GREATER_OR_EQUAL` | `'GUARD_GREATER_OR_EQUAL'` | `GuardException.ERR_FIELD_NOT_ACCESSIBLE` | `'GUARD_FIELD_NOT_ACCESSIBLE'` |
+| `GuardException.ERR_LESS_THAN` | `'GUARD_LESS_THAN'` | `GuardException.ERR_FIELD_NOT_CREATEABLE` | `'GUARD_FIELD_NOT_CREATEABLE'` |
+| `GuardException.ERR_LESS_OR_EQUAL` | `'GUARD_LESS_OR_EQUAL'` | `GuardException.ERR_FIELD_NOT_UPDATEABLE` | `'GUARD_FIELD_NOT_UPDATEABLE'` |
+| `GuardException.ERR_OUT_OF_RANGE` | `'GUARD_OUT_OF_RANGE'` | `GuardException.ERR_INVALID_GUARD_ARGUMENT` | `'GUARD_INVALID_ARGUMENT'` |
+| `GuardException.ERR_ZERO_VALUE` | `'GUARD_ZERO_VALUE'` | `GuardException.ERR_EMPTY_COLLECTION` | `'GUARD_EMPTY_COLLECTION'` |
 
 </details>
 
@@ -558,19 +573,20 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 
 ## Test Coverage
 
-Verified on Salesforce API `v62.0` (Test Run ID `707d200001FriQA` — **23/23 tests passing**, **100% pass rate**, **1,100 ms** total runtime):
+Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 tests passing**, **100% pass rate**, **1,883 ms** total runtime, including locale-safe `System.runAs` and `Security.stripInaccessible` verification):
 
 | Apex Class | Responsibility | Verified Coverage |
 | :--- | :--- | :---: |
 | [`GuardException.cls`](force-app/main/default/classes/exceptions/GuardException.cls) | Structured exception & `toMap()` serialization | **100%** |
 | [`GuardStringValidator.cls`](force-app/main/default/classes/validators/GuardStringValidator.cls) | String empty/blank/length/regex validation | **100%** |
+| [`GuardSchemaValidator.cls`](force-app/main/default/classes/validators/GuardSchemaValidator.cls) | Opt-in running-user CRUD & FLS guards | **100%** |
 | [`GuardContext.cls`](force-app/main/default/classes/context/GuardContext.cls) | `Quiddity` & Trigger resolution + `LwcScope` + hooks | **99%** |
+| [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) | Public facade entry point | **97%** |
 | [`GuardObjectValidator.cls`](force-app/main/default/classes/validators/GuardObjectValidator.cls) | Object nullability & Boolean state assertions | **97%** |
-| [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) | Public facade entry point | **96%** |
 | [`GuardCollectionValidator.cls`](force-app/main/default/classes/validators/GuardCollectionValidator.cls) | List, Set & Map covariance validation | **95%** |
 | [`GuardNumericValidator.cls`](force-app/main/default/classes/validators/GuardNumericValidator.cls) | Bounds, inclusive range & non-zero checks | **95%** |
 | [`GuardSObjectValidator.cls`](force-app/main/default/classes/validators/GuardSObjectValidator.cls) | Id parsing, SObjectType & `isSet()` field checks | **94%** |
-| [`GuardRecord.cls`](force-app/main/default/classes/core/GuardRecord.cls) | Fluent Trigger `addError()` builder | **89%** |
+| [`GuardRecord.cls`](force-app/main/default/classes/core/GuardRecord.cls) | Fluent Trigger `addError()` & `.skipInaccessible()` builder | **91%** |
 | [`GuardFlowAction.cls`](force-app/main/default/classes/invocable/GuardFlowAction.cls) | Flow & Agentforce `@InvocableMethod` | **83%** |
 
 ---

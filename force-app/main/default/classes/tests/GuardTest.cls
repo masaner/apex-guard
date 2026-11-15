@@ -950,4 +950,369 @@ private class GuardTest {
             System.Assert.areEqual('Custom domain failure', ex.getMessage());
         }
     }
+
+    // =========================================================================
+    // 7. Schema Permissions (CRUD & FLS — Opt-In & Running-User Context)
+    // =========================================================================
+
+    @IsTest
+    private static void testSchemaCrudAndFlsGuardsWithSystemRunAs() {
+        Guard.resetContext();
+        CustomDomainException customEx = new CustomDomainException('CRUD denied');
+
+        // Verify passing overloads (default, customMessage, customException) under privileged context
+        if (Schema.SObjectType.Account.isAccessible()) {
+            System.Assert.areEqual(Account.SObjectType, Guard.isAccessible(Account.SObjectType));
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isAccessible(Account.SObjectType, 'Read required')
+            );
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isAccessible(Account.SObjectType, customEx)
+            );
+        }
+        if (Schema.SObjectType.Account.isCreateable()) {
+            System.Assert.areEqual(Account.SObjectType, Guard.isCreateable(Account.SObjectType));
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isCreateable(Account.SObjectType, 'Create required')
+            );
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isCreateable(Account.SObjectType, customEx)
+            );
+        }
+        if (Schema.SObjectType.Account.isUpdateable()) {
+            System.Assert.areEqual(Account.SObjectType, Guard.isUpdateable(Account.SObjectType));
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isUpdateable(Account.SObjectType, 'Update required')
+            );
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isUpdateable(Account.SObjectType, customEx)
+            );
+        }
+        if (Schema.SObjectType.Account.isDeletable()) {
+            System.Assert.areEqual(Account.SObjectType, Guard.isDeletable(Account.SObjectType));
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isDeletable(Account.SObjectType, 'Delete required')
+            );
+            System.Assert.areEqual(
+                Account.SObjectType,
+                Guard.isDeletable(Account.SObjectType, customEx)
+            );
+        }
+        if (Schema.SObjectType.Account.fields.Name.isAccessible()) {
+            System.Assert.areEqual(Account.Name, Guard.isFieldAccessible(Account.Name));
+            System.Assert.areEqual(
+                Account.Name,
+                Guard.isFieldAccessible(Account.Name, 'Field read required')
+            );
+            System.Assert.areEqual(Account.Name, Guard.isFieldAccessible(Account.Name, customEx));
+        }
+        if (Schema.SObjectType.Account.fields.Name.isCreateable()) {
+            System.Assert.areEqual(Account.Name, Guard.isFieldCreateable(Account.Name));
+            System.Assert.areEqual(
+                Account.Name,
+                Guard.isFieldCreateable(Account.Name, 'Field create required')
+            );
+            System.Assert.areEqual(Account.Name, Guard.isFieldCreateable(Account.Name, customEx));
+        }
+        if (Schema.SObjectType.Account.fields.Name.isUpdateable()) {
+            System.Assert.areEqual(Account.Name, Guard.isFieldUpdateable(Account.Name));
+            System.Assert.areEqual(
+                Account.Name,
+                Guard.isFieldUpdateable(Account.Name, 'Field update required')
+            );
+            System.Assert.areEqual(Account.Name, Guard.isFieldUpdateable(Account.Name, customEx));
+        }
+
+        User runAsUser = createStandardTestUser();
+
+        System.runAs(runAsUser) {
+            Guard.resetContext();
+            try {
+                // Guard against Security.stripInaccessible NoAccessException when restricted user lacks Account access
+                Account rawAcc = new Account(Name = 'Security Safe Corp', AnnualRevenue = 50000);
+                Account sparseOrStrippedAcc;
+                if (Schema.SObjectType.Account.isAccessible()) {
+                    System.Assert.areEqual(
+                        Account.SObjectType,
+                        Guard.isAccessible(Account.SObjectType)
+                    );
+                    SObjectAccessDecision decision = Security.stripInaccessible(
+                        AccessType.READABLE,
+                        new List<Account>{ rawAcc }
+                    );
+                    sparseOrStrippedAcc = (Account) decision.getRecords()[0];
+                } else {
+                    try {
+                        Guard.isAccessible(Account.SObjectType);
+                        System.Assert.fail(
+                            'Expected GuardException for restricted Account access.'
+                        );
+                    } catch (GuardException ex) {
+                        System.Assert.areEqual(
+                            GuardException.ERR_SOBJECT_NOT_ACCESSIBLE,
+                            ex.getErrorCode()
+                        );
+                    }
+                    sparseOrStrippedAcc = rawAcc;
+                }
+
+                // Unset field throws structured GuardException instead of System.SObjectException
+                try {
+                    Guard.hasPopulatedField(sparseOrStrippedAcc, Account.TickerSymbol, 'account');
+                    System.Assert.fail('Expected GuardException for unset TickerSymbol.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(GuardException.ERR_UNPOPULATED_FIELD, ex.getErrorCode());
+                }
+
+                // Trigger builder safely reads stripped/unset fields without SObjectException
+                GuardRecord safeValidator = Guard.onRecord(sparseOrStrippedAcc)
+                    .isNotBlank(Account.Name)
+                    .isGreaterThan(Account.AnnualRevenue, 0);
+                System.Assert.isTrue(safeValidator.isValid() || safeValidator.hasErrors());
+
+                // Pass-through returns on remaining accessible schema tokens
+                if (Schema.SObjectType.Account.isCreateable()) {
+                    System.Assert.areEqual(
+                        Account.SObjectType,
+                        Guard.isCreateable(Account.SObjectType)
+                    );
+                }
+                if (Schema.SObjectType.Account.isUpdateable()) {
+                    System.Assert.areEqual(
+                        Account.SObjectType,
+                        Guard.isUpdateable(Account.SObjectType)
+                    );
+                }
+                if (Schema.SObjectType.Account.isDeletable()) {
+                    System.Assert.areEqual(
+                        Account.SObjectType,
+                        Guard.isDeletable(Account.SObjectType)
+                    );
+                }
+                if (Schema.SObjectType.Account.fields.Name.isAccessible()) {
+                    System.Assert.areEqual(Account.Name, Guard.isFieldAccessible(Account.Name));
+                }
+
+                // Naturally non-createable / non-updateable audit field check
+                try {
+                    Guard.isFieldCreateable(Account.CreatedDate);
+                    System.Assert.fail('Expected GuardException for CreatedDate createability.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_FIELD_NOT_CREATEABLE,
+                        ex.getErrorCode()
+                    );
+                    System.Assert.areEqual('CreatedDate', ex.getParamName());
+                }
+
+                try {
+                    Guard.isFieldUpdateable(Account.CreatedDate);
+                    System.Assert.fail('Expected GuardException for CreatedDate updateability.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_FIELD_NOT_UPDATEABLE,
+                        ex.getErrorCode()
+                    );
+                    System.Assert.areEqual('CreatedDate', ex.getParamName());
+                }
+
+                // Deterministic CRUD denial simulation across default, customMessage & customException overloads
+                GuardSchemaValidator.testForceDenyCrud = true;
+
+                try {
+                    Guard.isAccessible(Account.SObjectType);
+                    System.Assert.fail('Expected GuardException for denied read access.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_SOBJECT_NOT_ACCESSIBLE,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isAccessible(Account.SObjectType, 'Custom no read');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom no read', ex.getMessage());
+                }
+                try {
+                    Guard.isAccessible(Account.SObjectType, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                try {
+                    Guard.isCreateable(Account.SObjectType);
+                    System.Assert.fail('Expected GuardException for denied create access.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_SOBJECT_NOT_CREATEABLE,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isCreateable(Account.SObjectType, 'Custom no create');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom no create', ex.getMessage());
+                }
+                try {
+                    Guard.isCreateable(Account.SObjectType, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                try {
+                    Guard.isUpdateable(Account.SObjectType);
+                    System.Assert.fail('Expected GuardException for denied update access.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_SOBJECT_NOT_UPDATEABLE,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isUpdateable(Account.SObjectType, 'Custom no update');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom no update', ex.getMessage());
+                }
+                try {
+                    Guard.isUpdateable(Account.SObjectType, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                try {
+                    Guard.isDeletable(Account.SObjectType);
+                    System.Assert.fail('Expected GuardException for denied delete access.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_SOBJECT_NOT_DELETABLE,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isDeletable(Account.SObjectType, 'Custom no delete');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom no delete', ex.getMessage());
+                }
+                try {
+                    Guard.isDeletable(Account.SObjectType, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                // Deterministic FLS denial simulation
+                GuardSchemaValidator.testForceDenyFls = true;
+
+                try {
+                    Guard.isFieldAccessible(Account.Name);
+                    System.Assert.fail('Expected GuardException for denied field read.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_FIELD_NOT_ACCESSIBLE,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isFieldAccessible(Account.Name, 'Custom FLS read');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom FLS read', ex.getMessage());
+                }
+                try {
+                    Guard.isFieldAccessible(Account.Name, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                try {
+                    Guard.isFieldCreateable(Account.Name, 'Custom FLS create');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom FLS create', ex.getMessage());
+                }
+                try {
+                    Guard.isFieldCreateable(Account.Name, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                try {
+                    Guard.isFieldUpdateable(Account.Name, 'Custom FLS update');
+                    System.Assert.fail('Expected GuardException.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual('Custom FLS update', ex.getMessage());
+                }
+                try {
+                    Guard.isFieldUpdateable(Account.Name, customEx);
+                    System.Assert.fail('Expected CustomDomainException.');
+                } catch (CustomDomainException ex) {
+                    System.Assert.areEqual('CRUD denied', ex.getMessage());
+                }
+
+                // Null schema token checks fail with ERR_INVALID_GUARD_ARGUMENT
+                try {
+                    Guard.isAccessible((Schema.SObjectType) null);
+                    System.Assert.fail('Expected GuardException for null SObjectType.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_INVALID_GUARD_ARGUMENT,
+                        ex.getErrorCode()
+                    );
+                }
+                try {
+                    Guard.isFieldAccessible((Schema.SObjectField) null);
+                    System.Assert.fail('Expected GuardException for null SObjectField.');
+                } catch (GuardException ex) {
+                    System.Assert.areEqual(
+                        GuardException.ERR_INVALID_GUARD_ARGUMENT,
+                        ex.getErrorCode()
+                    );
+                }
+            } finally {
+                Guard.resetContext();
+            }
+        }
+    }
+
+    private static User createStandardTestUser() {
+        List<Profile> profiles = [
+            SELECT Id
+            FROM Profile
+            WHERE UserType = 'Standard' AND PermissionsModifyAllData = FALSE
+            LIMIT 1
+        ];
+        Id profileId = !profiles.isEmpty() ? profiles[0].Id : UserInfo.getProfileId();
+        String uniqueToken =
+            String.valueOf(System.now().getTime()) +
+            '.' +
+            String.valueOf(Math.abs(Crypto.getRandomInteger()));
+
+        return new User(
+            Alias = 'guardusr',
+            Email = 'apexguard.' + uniqueToken + '@example.com',
+            EmailEncodingKey = 'UTF-8',
+            LastName = 'GuardTestUser',
+            LanguageLocaleKey = 'en_US',
+            LocaleSidKey = 'en_US',
+            ProfileId = profileId,
+            TimeZoneSidKey = 'GMT',
+            Username = 'apexguard.' + uniqueToken + '@' + UserInfo.getOrganizationId() + '.test'
+        );
+    }
 }

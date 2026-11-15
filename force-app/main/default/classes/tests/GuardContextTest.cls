@@ -220,6 +220,20 @@ private class GuardContextTest {
         System.Assert.areEqual(accId, lwc.isIdOfType(accId, Account.SObjectType, 'accId'));
         System.Assert.areEqual(acc, lwc.isSObjectType(acc, Account.SObjectType, 'acc'));
         System.Assert.areEqual(acc, lwc.hasPopulatedField(acc, Account.Name, 'acc'));
+        System.Assert.areEqual(Account.SObjectType, lwc.isAccessible(Account.SObjectType));
+        System.Assert.areEqual(Account.SObjectType, lwc.isCreateable(Account.SObjectType));
+        System.Assert.areEqual(Account.SObjectType, lwc.isUpdateable(Account.SObjectType));
+        System.Assert.areEqual(Account.SObjectType, lwc.isDeletable(Account.SObjectType));
+        System.Assert.areEqual(Account.Name, lwc.isFieldAccessible(Account.Name));
+        System.Assert.areEqual(Account.Name, lwc.isFieldCreateable(Account.Name));
+        System.Assert.areEqual(Account.Name, lwc.isFieldUpdateable(Account.Name));
+
+        try {
+            lwc.isFieldCreateable(Account.CreatedDate);
+            System.Assert.fail('Expected AuraHandledException from LwcScope.isFieldCreateable.');
+        } catch (AuraHandledException ex) {
+            System.Assert.isTrue(ex.getMessage().contains('CreatedDate'));
+        }
 
         try {
             lwc.isNotZero(0, 'divisor');

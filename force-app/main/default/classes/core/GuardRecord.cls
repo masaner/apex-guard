@@ -8,6 +8,7 @@
 public inherited sharing class GuardRecord {
     private final SObject record;
     private final List<String> errorMessages;
+    private Boolean skipInaccessibleFields = false;
 
     /**
      * @description Constructs a GuardRecord validator wrapping a non-null SObject instance.
@@ -18,6 +19,26 @@ public inherited sharing class GuardRecord {
         GuardObjectValidator.isNotNull(record, 'record');
         this.record = record;
         this.errorMessages = new List<String>();
+    }
+
+    /**
+     * @description Enables opt-in FLS awareness so subsequent field validations silently skip fields
+     *              that are inaccessible to the running user. Disabled by default so Trigger system
+     *              context validations remain unaffected unless explicitly requested.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord skipInaccessible() {
+        return skipInaccessible(true);
+    }
+
+    /**
+     * @description Explicitly enables or disables opt-in skipping of FLS-inaccessible fields.
+     * @param enabled True to skip fields where the running user lacks read FLS; false to validate all fields.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord skipInaccessible(Boolean enabled) {
+        this.skipInaccessibleFields = (enabled == true);
+        return this;
     }
 
     // =========================================================================
@@ -40,6 +61,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isNotNull(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         Object value = readFieldValue(field);
         if (value == null) {
             String message = String.isNotBlank(customMessage)
@@ -83,6 +107,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isNull(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         Object value = readFieldValue(field);
         if (value != null) {
             String message = String.isNotBlank(customMessage)
@@ -139,6 +166,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isTrue(Boolean condition, Schema.SObjectField field, String message) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         if (condition != true) {
             addFieldError(
                 field,
@@ -171,6 +201,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isFalse(Boolean condition, Schema.SObjectField field, String message) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         if (condition != false) {
             addFieldError(
                 field,
@@ -200,6 +233,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isNotEmpty(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         String value = readStringValue(field);
         if (String.isEmpty(value)) {
             String message = String.isNotBlank(customMessage)
@@ -243,6 +279,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isNotBlank(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         String value = readStringValue(field);
         if (String.isBlank(value)) {
             String message = String.isNotBlank(customMessage)
@@ -292,6 +331,9 @@ public inherited sharing class GuardRecord {
         Integer expectedLength,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNegativeLength(expectedLength, 'expectedLength');
         String value = readStringValue(field);
         if (value == null || value.length() != expectedLength) {
@@ -356,6 +398,9 @@ public inherited sharing class GuardRecord {
         Integer maxLength,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNegativeLength(maxLength, 'maxLength');
         String value = readStringValue(field);
         if (value == null || value.length() > maxLength) {
@@ -420,6 +465,9 @@ public inherited sharing class GuardRecord {
         String regexPattern,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonEmptyPattern(regexPattern);
         String value = readStringValue(field);
         if (value == null || !Pattern.compile(regexPattern).matcher(value).matches()) {
@@ -482,6 +530,9 @@ public inherited sharing class GuardRecord {
         Decimal minExclusive,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNullBound(minExclusive, 'minExclusive');
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value <= minExclusive) {
@@ -544,6 +595,9 @@ public inherited sharing class GuardRecord {
         Decimal minInclusive,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNullBound(minInclusive, 'minInclusive');
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value < minInclusive) {
@@ -610,6 +664,9 @@ public inherited sharing class GuardRecord {
         Decimal maxExclusive,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNullBound(maxExclusive, 'maxExclusive');
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value >= maxExclusive) {
@@ -672,6 +729,9 @@ public inherited sharing class GuardRecord {
         Decimal maxInclusive,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireNonNullBound(maxInclusive, 'maxInclusive');
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value > maxInclusive) {
@@ -741,6 +801,9 @@ public inherited sharing class GuardRecord {
         Decimal maxInclusive,
         String customMessage
     ) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireValidRange(minInclusive, maxInclusive);
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value < minInclusive || value > maxInclusive) {
@@ -807,6 +870,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord isNotZero(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         Decimal value = toDecimal(readFieldValue(field));
         if (value == null || value == 0) {
             String message = String.isNotBlank(customMessage)
@@ -854,6 +920,9 @@ public inherited sharing class GuardRecord {
      * @return This GuardRecord instance for fluent chaining.
      */
     public GuardRecord hasPopulatedField(Schema.SObjectField field, String customMessage) {
+        if (shouldSkipField(field)) {
+            return this;
+        }
         requireField(field);
         if (!this.record.isSet(field) || this.record.get(field) == null) {
             String message = String.isNotBlank(customMessage)
@@ -862,6 +931,82 @@ public inherited sharing class GuardRecord {
             addFieldError(field, message);
         }
         return this;
+    }
+
+    // =========================================================================
+    // Opt-In Field-Level Security (FLS) Checks
+    // =========================================================================
+
+    /**
+     * @description Attaches a field error if the running user lacks read FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldAccessible(Schema.SObjectField field) {
+        return isFieldAccessible(field, null);
+    }
+
+    /**
+     * @description Attaches a field error with a custom message if the running user lacks read FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @param customMessage Optional override error message.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldAccessible(Schema.SObjectField field, String customMessage) {
+        return enforceFieldFls(
+            field,
+            GuardSchemaValidator.checkFieldAccessible(field),
+            'read',
+            customMessage
+        );
+    }
+
+    /**
+     * @description Attaches a field error if the running user lacks create FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldCreateable(Schema.SObjectField field) {
+        return isFieldCreateable(field, null);
+    }
+
+    /**
+     * @description Attaches a field error with a custom message if the running user lacks create FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @param customMessage Optional override error message.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldCreateable(Schema.SObjectField field, String customMessage) {
+        return enforceFieldFls(
+            field,
+            GuardSchemaValidator.checkFieldCreateable(field),
+            'create',
+            customMessage
+        );
+    }
+
+    /**
+     * @description Attaches a field error if the running user lacks update FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldUpdateable(Schema.SObjectField field) {
+        return isFieldUpdateable(field, null);
+    }
+
+    /**
+     * @description Attaches a field error with a custom message if the running user lacks update FLS permission on field.
+     * @param field Schema.SObjectField to verify.
+     * @param customMessage Optional override error message.
+     * @return This GuardRecord instance for fluent chaining.
+     */
+    public GuardRecord isFieldUpdateable(Schema.SObjectField field, String customMessage) {
+        return enforceFieldFls(
+            field,
+            GuardSchemaValidator.checkFieldUpdateable(field),
+            'update',
+            customMessage
+        );
     }
 
     // =========================================================================
@@ -903,6 +1048,31 @@ public inherited sharing class GuardRecord {
     // =========================================================================
     // Internal Helpers
     // =========================================================================
+
+    private Boolean shouldSkipField(Schema.SObjectField field) {
+        requireField(field);
+        return this.skipInaccessibleFields && !GuardSchemaValidator.checkFieldAccessible(field);
+    }
+
+    private GuardRecord enforceFieldFls(
+        Schema.SObjectField field,
+        Boolean hasPermission,
+        String accessLabel,
+        String customMessage
+    ) {
+        requireField(field);
+        if (!hasPermission) {
+            String message = String.isNotBlank(customMessage)
+                ? customMessage
+                : 'Running user does not have ' +
+                  accessLabel +
+                  ' access to field \'' +
+                  fieldName(field) +
+                  '\'.';
+            addFieldError(field, message);
+        }
+        return this;
+    }
 
     private void addFieldError(Schema.SObjectField field, String message) {
         requireField(field);

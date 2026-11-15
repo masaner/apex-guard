@@ -500,6 +500,111 @@ public inherited sharing class GuardContext {
                 GuardContext.setLwcMode(this.previousForceLwcMode);
             }
         }
+
+        /**
+         * @description Ensures running user has read CRUD access on sObjectType, throwing AuraHandledException on failure.
+         * @param sObjectType Schema.SObjectType token to verify.
+         * @return Validated Schema.SObjectType token.
+         * @throws AuraHandledException when running user lacks read access.
+         */
+        public Schema.SObjectType isAccessible(Schema.SObjectType sObjectType) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isAccessible(sObjectType);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has create CRUD access on sObjectType, throwing AuraHandledException on failure.
+         * @param sObjectType Schema.SObjectType token to verify.
+         * @return Validated Schema.SObjectType token.
+         * @throws AuraHandledException when running user lacks create access.
+         */
+        public Schema.SObjectType isCreateable(Schema.SObjectType sObjectType) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isCreateable(sObjectType);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has update CRUD access on sObjectType, throwing AuraHandledException on failure.
+         * @param sObjectType Schema.SObjectType token to verify.
+         * @return Validated Schema.SObjectType token.
+         * @throws AuraHandledException when running user lacks update access.
+         */
+        public Schema.SObjectType isUpdateable(Schema.SObjectType sObjectType) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isUpdateable(sObjectType);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has delete CRUD access on sObjectType, throwing AuraHandledException on failure.
+         * @param sObjectType Schema.SObjectType token to verify.
+         * @return Validated Schema.SObjectType token.
+         * @throws AuraHandledException when running user lacks delete access.
+         */
+        public Schema.SObjectType isDeletable(Schema.SObjectType sObjectType) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isDeletable(sObjectType);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has read FLS access on field, throwing AuraHandledException on failure.
+         * @param field Schema.SObjectField token to verify.
+         * @return Validated Schema.SObjectField token.
+         * @throws AuraHandledException when running user lacks read access on field.
+         */
+        public Schema.SObjectField isFieldAccessible(Schema.SObjectField field) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isFieldAccessible(field);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has create FLS access on field, throwing AuraHandledException on failure.
+         * @param field Schema.SObjectField token to verify.
+         * @return Validated Schema.SObjectField token.
+         * @throws AuraHandledException when running user lacks create access on field.
+         */
+        public Schema.SObjectField isFieldCreateable(Schema.SObjectField field) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isFieldCreateable(field);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
+
+        /**
+         * @description Ensures running user has update FLS access on field, throwing AuraHandledException on failure.
+         * @param field Schema.SObjectField token to verify.
+         * @return Validated Schema.SObjectField token.
+         * @throws AuraHandledException when running user lacks update access on field.
+         */
+        public Schema.SObjectField isFieldUpdateable(Schema.SObjectField field) {
+            GuardContext.setLwcMode(true);
+            try {
+                return GuardSchemaValidator.isFieldUpdateable(field);
+            } finally {
+                GuardContext.setLwcMode(this.previousForceLwcMode);
+            }
+        }
     }
 
     /**
@@ -600,6 +705,7 @@ public inherited sharing class GuardContext {
         autoDetectAuraQuiddity = true;
         testQuiddityOverride = null;
         testTriggerExecutingOverride = null;
+        GuardSchemaValidator.resetTestOverrides();
     }
 
     /**

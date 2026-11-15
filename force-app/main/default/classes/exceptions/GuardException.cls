@@ -27,6 +27,13 @@ public inherited sharing class GuardException extends Exception {
     public static final String ERR_ID_SOBJECT_TYPE = 'GUARD_ID_SOBJECT_TYPE';
     public static final String ERR_SOBJECT_TYPE = 'GUARD_SOBJECT_TYPE';
     public static final String ERR_UNPOPULATED_FIELD = 'GUARD_UNPOPULATED_FIELD';
+    public static final String ERR_SOBJECT_NOT_ACCESSIBLE = 'GUARD_SOBJECT_NOT_ACCESSIBLE';
+    public static final String ERR_SOBJECT_NOT_CREATEABLE = 'GUARD_SOBJECT_NOT_CREATEABLE';
+    public static final String ERR_SOBJECT_NOT_UPDATEABLE = 'GUARD_SOBJECT_NOT_UPDATEABLE';
+    public static final String ERR_SOBJECT_NOT_DELETABLE = 'GUARD_SOBJECT_NOT_DELETABLE';
+    public static final String ERR_FIELD_NOT_ACCESSIBLE = 'GUARD_FIELD_NOT_ACCESSIBLE';
+    public static final String ERR_FIELD_NOT_CREATEABLE = 'GUARD_FIELD_NOT_CREATEABLE';
+    public static final String ERR_FIELD_NOT_UPDATEABLE = 'GUARD_FIELD_NOT_UPDATEABLE';
     public static final String ERR_INVALID_GUARD_ARGUMENT = 'GUARD_INVALID_ARGUMENT';
 
     private String paramName;

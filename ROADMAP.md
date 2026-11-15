@@ -2,8 +2,9 @@
 
 ## Phase 1: Core Library, Context Foundation & Enablement (Completed)
 
-- **Zero-Dependency SFDX Package:** `Guard.cls` public facade with modular internal validators (`GuardObjectValidator`, `GuardStringValidator`, `GuardNumericValidator`, `GuardCollectionValidator`, `GuardSObjectValidator`).
+- **Zero-Dependency SFDX Package:** `Guard.cls` public facade with modular internal validators (`GuardObjectValidator`, `GuardStringValidator`, `GuardNumericValidator`, `GuardCollectionValidator`, `GuardSObjectValidator`, `GuardSchemaValidator`).
 - **Context-Aware Failure Dispatch:** `GuardContext.cls` resolving `System.Request.getCurrent().getQuiddity()` and `Trigger.isExecuting`, with automatic/explicit `AuraHandledException.setMessage()` wrapping for LWC (`Guard.forLwc()`).
+- **Opt-In Running-User Schema Permissions (CRUD & FLS):** `GuardSchemaValidator.cls` providing `Guard.isAccessible`, `isCreateable`, `isUpdateable`, `isDeletable`, `isFieldAccessible`, `isFieldCreateable`, and `isFieldUpdateable`, plus opt-in `Guard.onRecord(record).skipInaccessible()`.
 - **Non-Throwing Trigger Validation:** Fluent `Guard.onRecord(SObject)` builder (`GuardRecord.cls`) routing field-level and record-level failures to `SObject.addError()`.
 - **Flow & Agentforce Action:** Bulkified `GuardFlowAction.cls` (`@InvocableMethod`) supporting both Flow Fault paths (`throwOnFailure = true`) and Decision routing (`throwOnFailure = false`).
 - **Extensibility:** `IGuardFailureHandler` hook and structured `GuardException.toMap()` metadata for **Nebula Logger**, REST APIs, and `TransactionFinalizer`.
@@ -37,5 +38,4 @@ A standalone Python CLI tool designed to modernize legacy Salesforce codebases a
 
 ### 4. Additional Validator Domains
 - `GuardDateValidator`: `isAfter`, `isBefore`, `isFutureDate`, `isPastDate`, `isWithinDateRange` for `Date` and `Datetime`.
-- `GuardSchemaValidator`: `isAccessible`, `isCreateable`, `isUpdateable` FLS/CRUD precondition helpers complementing `USER_MODE` / `Security.stripInaccessible`.
 - Additional String formats: `isEmail`, `isUrl`, `isUuid`.

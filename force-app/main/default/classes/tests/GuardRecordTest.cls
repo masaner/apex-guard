@@ -169,4 +169,85 @@ private class GuardRecordTest {
         System.Assert.isTrue(failing.hasErrors());
         System.Assert.areEqual(23, failing.getErrorMessages().size());
     }
+
+    @IsTest
+    private static void testSkipInaccessibleAndExplicitFieldFlsGuards() {
+        Guard.resetContext();
+        try {
+            // 1. Default Guard.onRecord() does NOT skip/enforce FLS (safe for system-context Triggers)
+            GuardSchemaValidator.testForceDenyFls = true;
+            Account defaultModeAcc = new Account(Name = '   ');
+            GuardRecord defaultValidator = Guard.onRecord(defaultModeAcc)
+                .isNotBlank(Account.Name, 'Name required in trigger system context.');
+            System.Assert.isTrue(defaultValidator.hasErrors());
+            System.Assert.areEqual(1, defaultModeAcc.getErrors().size());
+
+            // 2. Opt-in skipInaccessible() skips FLS-inaccessible fields silently
+            Account skippedAcc = new Account(
+                Name = ' ',
+                Description = 'HasValue',
+                AccountNumber = '1',
+                TickerSymbol = 'TOOLONG',
+                AnnualRevenue = -10,
+                NumberOfEmployees = 0
+            );
+            GuardRecord flsAwareValidator = Guard.onRecord(skippedAcc)
+                .skipInaccessible()
+                .isNotNull(Account.Name)
+                .isNull(Account.Description)
+                .isTrue(false, Account.Name, 'Skipped field flag')
+                .isFalse(true, Account.Name, 'Skipped field false flag')
+                .isNotEmpty(Account.Name)
+                .isNotBlank(Account.Name)
+                .hasLengthEqualTo(Account.AccountNumber, 5)
+                .hasMaxLength(Account.TickerSymbol, 4)
+                .matchesRegex(Account.Name, '^\\d+$')
+                .isGreaterThan(Account.AnnualRevenue, 0)
+                .isGreaterThanOrEqualTo(Account.AnnualRevenue, 0)
+                .isLessThan(Account.AnnualRevenue, -100)
+                .isLessThanOrEqualTo(Account.AnnualRevenue, -100)
+                .isInRange(Account.AnnualRevenue, 1, 100)
+                .isNotZero(Account.NumberOfEmployees)
+                .hasPopulatedField(Account.Industry)
+                .isTrue(false, 'Record-level assertion still executes.');
+
+            System.Assert.isTrue(flsAwareValidator.hasErrors());
+            System.Assert.areEqual(1, flsAwareValidator.getErrorMessages().size());
+            System.Assert.areEqual(
+                'Record-level assertion still executes.',
+                flsAwareValidator.getErrorMessages()[0]
+            );
+
+            // Re-disabling skipInaccessible resumes validation
+            flsAwareValidator.skipInaccessible(false).isNotBlank(Account.Name);
+            System.Assert.areEqual(2, flsAwareValidator.getErrorMessages().size());
+
+            // 3. Explicit opt-in FLS checks attach field errors cleanly
+            Guard.resetContext();
+            Account auditAcc = new Account(Name = 'Audit Corp');
+            GuardRecord explicitFls = Guard.onRecord(auditAcc)
+                .isFieldAccessible(Account.Name)
+                .isFieldCreateable(Account.Name)
+                .isFieldUpdateable(Account.Name)
+                .isFieldCreateable(Account.CreatedDate)
+                .isFieldUpdateable(Account.CreatedDate, 'Custom CreatedDate read-only message.');
+
+            System.Assert.isTrue(explicitFls.hasErrors());
+            System.Assert.areEqual(2, explicitFls.getErrorMessages().size());
+            System.Assert.areEqual(
+                'Custom CreatedDate read-only message.',
+                explicitFls.getErrorMessages()[1]
+            );
+
+            GuardSchemaValidator.testForceDenyFls = true;
+            Account deniedAcc = new Account(Name = 'Denied Corp');
+            GuardRecord deniedFls = Guard.onRecord(deniedAcc)
+                .isFieldAccessible(Account.Name)
+                .isFieldUpdateable(Account.Name);
+            System.Assert.isTrue(deniedFls.hasErrors());
+            System.Assert.areEqual(2, deniedFls.getErrorMessages().size());
+        } finally {
+            Guard.resetContext();
+        }
+    }
 }

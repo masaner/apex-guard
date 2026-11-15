@@ -2345,7 +2345,277 @@ public inherited sharing class Guard {
     }
 
     // =========================================================================
-    // 7. Context, Trigger Record Builder & Extensibility Entry Points
+    // 7. Schema Permissions (CRUD & FLS — Opt-In)
+    // =========================================================================
+
+    /**
+     * @description Ensures the running user has read (accessible) CRUD access on sObjectType.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks read access (or AuraHandledException in LWC/Aura context).
+     */
+    public static Schema.SObjectType isAccessible(Schema.SObjectType sObjectType) {
+        return GuardSchemaValidator.isAccessible(sObjectType);
+    }
+
+    /**
+     * @description Ensures the running user has read (accessible) CRUD access on sObjectType with a custom message.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks read access.
+     */
+    public static Schema.SObjectType isAccessible(
+        Schema.SObjectType sObjectType,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isAccessible(sObjectType, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has read (accessible) CRUD access on sObjectType, throwing a custom Exception.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectType token.
+     * @throws Exception customException when the running user lacks read access.
+     */
+    public static Schema.SObjectType isAccessible(
+        Schema.SObjectType sObjectType,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isAccessible(sObjectType, customException);
+    }
+
+    /**
+     * @description Ensures the running user has create CRUD access on sObjectType.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks create access.
+     */
+    public static Schema.SObjectType isCreateable(Schema.SObjectType sObjectType) {
+        return GuardSchemaValidator.isCreateable(sObjectType);
+    }
+
+    /**
+     * @description Ensures the running user has create CRUD access on sObjectType with a custom message.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks create access.
+     */
+    public static Schema.SObjectType isCreateable(
+        Schema.SObjectType sObjectType,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isCreateable(sObjectType, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has create CRUD access on sObjectType, throwing a custom Exception.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectType token.
+     * @throws Exception customException when the running user lacks create access.
+     */
+    public static Schema.SObjectType isCreateable(
+        Schema.SObjectType sObjectType,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isCreateable(sObjectType, customException);
+    }
+
+    /**
+     * @description Ensures the running user has update CRUD access on sObjectType.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks update access.
+     */
+    public static Schema.SObjectType isUpdateable(Schema.SObjectType sObjectType) {
+        return GuardSchemaValidator.isUpdateable(sObjectType);
+    }
+
+    /**
+     * @description Ensures the running user has update CRUD access on sObjectType with a custom message.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks update access.
+     */
+    public static Schema.SObjectType isUpdateable(
+        Schema.SObjectType sObjectType,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isUpdateable(sObjectType, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has update CRUD access on sObjectType, throwing a custom Exception.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectType token.
+     * @throws Exception customException when the running user lacks update access.
+     */
+    public static Schema.SObjectType isUpdateable(
+        Schema.SObjectType sObjectType,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isUpdateable(sObjectType, customException);
+    }
+
+    /**
+     * @description Ensures the running user has delete CRUD access on sObjectType.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks delete access.
+     */
+    public static Schema.SObjectType isDeletable(Schema.SObjectType sObjectType) {
+        return GuardSchemaValidator.isDeletable(sObjectType);
+    }
+
+    /**
+     * @description Ensures the running user has delete CRUD access on sObjectType with a custom message.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectType token.
+     * @throws GuardException when the running user lacks delete access.
+     */
+    public static Schema.SObjectType isDeletable(
+        Schema.SObjectType sObjectType,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isDeletable(sObjectType, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has delete CRUD access on sObjectType, throwing a custom Exception.
+     * @param sObjectType Schema.SObjectType token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectType token.
+     * @throws Exception customException when the running user lacks delete access.
+     */
+    public static Schema.SObjectType isDeletable(
+        Schema.SObjectType sObjectType,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isDeletable(sObjectType, customException);
+    }
+
+    /**
+     * @description Ensures the running user has read Field-Level Security (FLS) access on field.
+     * @param field Schema.SObjectField token to verify.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks read access on field.
+     */
+    public static Schema.SObjectField isFieldAccessible(Schema.SObjectField field) {
+        return GuardSchemaValidator.isFieldAccessible(field);
+    }
+
+    /**
+     * @description Ensures the running user has read FLS access on field with a custom message.
+     * @param field Schema.SObjectField token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks read access on field.
+     */
+    public static Schema.SObjectField isFieldAccessible(
+        Schema.SObjectField field,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isFieldAccessible(field, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has read FLS access on field, throwing a custom Exception.
+     * @param field Schema.SObjectField token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectField token.
+     * @throws Exception customException when the running user lacks read access on field.
+     */
+    public static Schema.SObjectField isFieldAccessible(
+        Schema.SObjectField field,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isFieldAccessible(field, customException);
+    }
+
+    /**
+     * @description Ensures the running user has create Field-Level Security (FLS) access on field.
+     * @param field Schema.SObjectField token to verify.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks create access on field.
+     */
+    public static Schema.SObjectField isFieldCreateable(Schema.SObjectField field) {
+        return GuardSchemaValidator.isFieldCreateable(field);
+    }
+
+    /**
+     * @description Ensures the running user has create FLS access on field with a custom message.
+     * @param field Schema.SObjectField token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks create access on field.
+     */
+    public static Schema.SObjectField isFieldCreateable(
+        Schema.SObjectField field,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isFieldCreateable(field, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has create FLS access on field, throwing a custom Exception.
+     * @param field Schema.SObjectField token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectField token.
+     * @throws Exception customException when the running user lacks create access on field.
+     */
+    public static Schema.SObjectField isFieldCreateable(
+        Schema.SObjectField field,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isFieldCreateable(field, customException);
+    }
+
+    /**
+     * @description Ensures the running user has update Field-Level Security (FLS) access on field.
+     * @param field Schema.SObjectField token to verify.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks update access on field.
+     */
+    public static Schema.SObjectField isFieldUpdateable(Schema.SObjectField field) {
+        return GuardSchemaValidator.isFieldUpdateable(field);
+    }
+
+    /**
+     * @description Ensures the running user has update FLS access on field with a custom message.
+     * @param field Schema.SObjectField token to verify.
+     * @param customMessage Custom error message overriding the default diagnostic text.
+     * @return The validated Schema.SObjectField token.
+     * @throws GuardException when the running user lacks update access on field.
+     */
+    public static Schema.SObjectField isFieldUpdateable(
+        Schema.SObjectField field,
+        String customMessage
+    ) {
+        return GuardSchemaValidator.isFieldUpdateable(field, customMessage);
+    }
+
+    /**
+     * @description Ensures the running user has update FLS access on field, throwing a custom Exception.
+     * @param field Schema.SObjectField token to verify.
+     * @param customException Caller-provided Exception instance thrown on failure.
+     * @return The validated Schema.SObjectField token.
+     * @throws Exception customException when the running user lacks update access on field.
+     */
+    public static Schema.SObjectField isFieldUpdateable(
+        Schema.SObjectField field,
+        Exception customException
+    ) {
+        return GuardSchemaValidator.isFieldUpdateable(field, customException);
+    }
+
+    // =========================================================================
+    // 8. Context, Trigger Record Builder & Extensibility Entry Points
     // =========================================================================
 
     /**
