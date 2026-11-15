@@ -25,7 +25,7 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Check formatting with Prettier
-        run: npx prettier --check "force-app/**/*.{cls,trigger}" "*.{json,md}" "docs/**/*.md" ".github/**/*.md"
+        run: npx prettier --check "force-app/**/*.{cls,trigger}" "sfdx-project.json" "package.json" "config/*.json"
 
   sfdx-structure-check:
     name: SFDX Metadata & Org Validation

@@ -7,6 +7,7 @@
 <br />
 <br />
 
+[![CI Status](https://img.shields.io/github/actions/workflow/status/masaner/apex-guard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/masaner/apex-guard/actions/workflows/ci.yml)
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v62.0-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://developer.salesforce.com/docs)
 [![Apex Tests](https://img.shields.io/badge/Tests-23%2F23%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
 [![Core Coverage](https://img.shields.io/badge/Core%20Coverage-96%25%2B-059669?style=for-the-badge)](#test-coverage)
@@ -192,7 +193,7 @@ force-app/main/default/classes/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<your-org>/apex-guard.git
+git clone https://github.com/masaner/apex-guard.git
 cd apex-guard
 
 # 2. Deploy all classes to your Scratch Org or Sandbox

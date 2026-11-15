@@ -146,7 +146,10 @@ private class GuardFlowActionTest {
     @IsTest
     private static void testEmptyAndNullRequestLists() {
         System.Assert.areEqual(0, GuardFlowAction.validate(null).size());
-        System.Assert.areEqual(0, GuardFlowAction.validate(new List<GuardFlowAction.Request>()).size());
+        System.Assert.areEqual(
+            0,
+            GuardFlowAction.validate(new List<GuardFlowAction.Request>()).size()
+        );
     }
 
     @IsTest

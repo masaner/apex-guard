@@ -696,11 +696,7 @@ public inherited sharing class GuardRecord {
      * @param paramName Parameter label included in the error message.
      * @return This GuardRecord instance for fluent chaining.
      */
-    public GuardRecord isLessThanOrEqualTo(
-        Decimal value,
-        Decimal maxInclusive,
-        String paramName
-    ) {
+    public GuardRecord isLessThanOrEqualTo(Decimal value, Decimal maxInclusive, String paramName) {
         requireNonNullBound(maxInclusive, 'maxInclusive');
         if (value == null || value > maxInclusive) {
             addRecordError(

@@ -992,7 +992,9 @@ public inherited sharing class GuardNumericValidator {
         if (value == 0) {
             String message = String.isNotBlank(customMessage)
                 ? customMessage
-                : 'Parameter \'' + GuardObjectValidator.safeParamName(paramName) + '\' must not be zero.';
+                : 'Parameter \'' +
+                  GuardObjectValidator.safeParamName(paramName) +
+                  '\' must not be zero.';
             GuardContext.fail(message, paramName, GuardException.ERR_ZERO_VALUE, value);
         }
         return value;
@@ -1100,7 +1102,9 @@ public inherited sharing class GuardNumericValidator {
     private static void failNullNumber(String paramName, String customMessage) {
         String message = String.isNotBlank(customMessage)
             ? customMessage
-            : 'Parameter \'' + GuardObjectValidator.safeParamName(paramName) + '\' must not be null.';
+            : 'Parameter \'' +
+              GuardObjectValidator.safeParamName(paramName) +
+              '\' must not be null.';
         GuardContext.fail(message, paramName, GuardException.ERR_NULL_VALUE, null);
     }
 }

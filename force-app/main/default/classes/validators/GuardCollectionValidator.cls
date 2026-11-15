@@ -123,11 +123,7 @@ public inherited sharing class GuardCollectionValidator {
      * @param customMessage Optional override error message.
      * @return The validated Set&lt;Id&gt;.
      */
-    public static Set<Id> isNotEmpty(
-        Set<Id> collection,
-        String paramName,
-        String customMessage
-    ) {
+    public static Set<Id> isNotEmpty(Set<Id> collection, String paramName, String customMessage) {
         if (collection == null || collection.isEmpty()) {
             failEmptyCollection(paramName, customMessage, collection);
         }

@@ -64,11 +64,7 @@ public inherited sharing class GuardSObjectValidator {
      * @param paramName Parameter name included in failure diagnostics.
      * @return The validated Salesforce Id.
      */
-    public static Id isIdOfType(
-        Id recordId,
-        Schema.SObjectType expectedType,
-        String paramName
-    ) {
+    public static Id isIdOfType(Id recordId, Schema.SObjectType expectedType, String paramName) {
         return isIdOfType(recordId, expectedType, paramName, null);
     }
 
@@ -90,7 +86,9 @@ public inherited sharing class GuardSObjectValidator {
         if (recordId == null) {
             String nullMsg = String.isNotBlank(customMessage)
                 ? customMessage
-                : 'Parameter \'' + GuardObjectValidator.safeParamName(paramName) + '\' must not be null.';
+                : 'Parameter \'' +
+                  GuardObjectValidator.safeParamName(paramName) +
+                  '\' must not be null.';
             GuardContext.fail(nullMsg, paramName, GuardException.ERR_NULL_VALUE, null);
         }
         Schema.SObjectType actualType = recordId.getSObjectType();
@@ -165,7 +163,9 @@ public inherited sharing class GuardSObjectValidator {
         if (record == null) {
             String nullMsg = String.isNotBlank(customMessage)
                 ? customMessage
-                : 'Parameter \'' + GuardObjectValidator.safeParamName(paramName) + '\' must not be null.';
+                : 'Parameter \'' +
+                  GuardObjectValidator.safeParamName(paramName) +
+                  '\' must not be null.';
             GuardContext.fail(nullMsg, paramName, GuardException.ERR_NULL_VALUE, null);
         }
         Schema.SObjectType actualType = record.getSObjectType();
@@ -248,7 +248,9 @@ public inherited sharing class GuardSObjectValidator {
         if (record == null) {
             String nullMsg = String.isNotBlank(customMessage)
                 ? customMessage
-                : 'Parameter \'' + GuardObjectValidator.safeParamName(paramName) + '\' must not be null.';
+                : 'Parameter \'' +
+                  GuardObjectValidator.safeParamName(paramName) +
+                  '\' must not be null.';
             GuardContext.fail(nullMsg, paramName, GuardException.ERR_NULL_VALUE, null);
         }
         if (!record.isSet(field) || record.get(field) == null) {

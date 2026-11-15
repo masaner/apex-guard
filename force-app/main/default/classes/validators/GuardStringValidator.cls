@@ -105,11 +105,7 @@ public inherited sharing class GuardStringValidator {
      * @param paramName Parameter name included in failure diagnostics.
      * @return The validated String.
      */
-    public static String hasLengthEqualTo(
-        String value,
-        Integer expectedLength,
-        String paramName
-    ) {
+    public static String hasLengthEqualTo(String value, Integer expectedLength, String paramName) {
         return hasLengthEqualTo(value, expectedLength, paramName, null);
     }
 
@@ -165,7 +161,12 @@ public inherited sharing class GuardStringValidator {
         Integer expectedLength,
         Exception customException
     ) {
-        if (expectedLength == null || expectedLength < 0 || value == null || value.length() != expectedLength) {
+        if (
+            expectedLength == null ||
+            expectedLength < 0 ||
+            value == null ||
+            value.length() != expectedLength
+        ) {
             GuardContext.failWithCustomException(
                 customException,
                 null,
@@ -234,11 +235,7 @@ public inherited sharing class GuardStringValidator {
      * @param customException Custom Exception instance to throw on failure.
      * @return The validated String.
      */
-    public static String hasMaxLength(
-        String value,
-        Integer maxLength,
-        Exception customException
-    ) {
+    public static String hasMaxLength(String value, Integer maxLength, Exception customException) {
         if (maxLength == null || maxLength < 0 || value == null || value.length() > maxLength) {
             GuardContext.failWithCustomException(
                 customException,

@@ -299,7 +299,9 @@ private class GuardTest {
         System.Assert.areEqual(1, Guard.isNotEmpty(accByKey, 'accByKey').size());
         System.Assert.isTrue(Guard.containsKey(accByKey, 'main', 'accByKey').containsKey('main'));
 
-        Map<String, String> headers = new Map<String, String>{ 'Content-Type' => 'application/json' };
+        Map<String, String> headers = new Map<String, String>{
+            'Content-Type' => 'application/json'
+        };
         System.Assert.areEqual(1, Guard.isNotEmpty(headers, 'headers').size());
         System.Assert.isTrue(
             Guard.containsKey(headers, 'Content-Type', 'headers').containsKey('Content-Type')
@@ -892,10 +894,7 @@ private class GuardTest {
         }
     }
 
-    private static void verifySalesforceNativeFailures(
-        Id conId,
-        CustomDomainException customEx
-    ) {
+    private static void verifySalesforceNativeFailures(Id conId, CustomDomainException customEx) {
         try {
             Guard.isValidId('bad', 'id', 'Custom bad id');
             System.Assert.fail('Expected GuardException.');

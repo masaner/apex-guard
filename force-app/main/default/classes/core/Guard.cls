@@ -207,11 +207,7 @@ public inherited sharing class Guard {
      * @return The validated String.
      * @throws GuardException when value is null or its length differs from expectedLength.
      */
-    public static String hasLengthEqualTo(
-        String value,
-        Integer expectedLength,
-        String paramName
-    ) {
+    public static String hasLengthEqualTo(String value, Integer expectedLength, String paramName) {
         return GuardStringValidator.hasLengthEqualTo(value, expectedLength, paramName);
     }
 
@@ -292,11 +288,7 @@ public inherited sharing class Guard {
      * @return The validated String.
      * @throws Exception customException when value is null or exceeds maxLength.
      */
-    public static String hasMaxLength(
-        String value,
-        Integer maxLength,
-        Exception customException
-    ) {
+    public static String hasMaxLength(String value, Integer maxLength, Exception customException) {
         return GuardStringValidator.hasMaxLength(value, maxLength, customException);
     }
 
@@ -999,12 +991,7 @@ public inherited sharing class Guard {
         Decimal maxInclusive,
         Exception customException
     ) {
-        return GuardNumericValidator.isInRange(
-            value,
-            minInclusive,
-            maxInclusive,
-            customException
-        );
+        return GuardNumericValidator.isInRange(value, minInclusive, maxInclusive, customException);
     }
 
     /**
@@ -1066,12 +1053,7 @@ public inherited sharing class Guard {
         Integer maxInclusive,
         Exception customException
     ) {
-        return GuardNumericValidator.isInRange(
-            value,
-            minInclusive,
-            maxInclusive,
-            customException
-        );
+        return GuardNumericValidator.isInRange(value, minInclusive, maxInclusive, customException);
     }
 
     /**
@@ -1133,12 +1115,7 @@ public inherited sharing class Guard {
         Long maxInclusive,
         Exception customException
     ) {
-        return GuardNumericValidator.isInRange(
-            value,
-            minInclusive,
-            maxInclusive,
-            customException
-        );
+        return GuardNumericValidator.isInRange(value, minInclusive, maxInclusive, customException);
     }
 
     /**
@@ -1342,11 +1319,7 @@ public inherited sharing class Guard {
      * @return The validated Set&lt;Id&gt;.
      * @throws GuardException when collection is null or empty.
      */
-    public static Set<Id> isNotEmpty(
-        Set<Id> collection,
-        String paramName,
-        String customMessage
-    ) {
+    public static Set<Id> isNotEmpty(Set<Id> collection, String paramName, String customMessage) {
         return GuardCollectionValidator.isNotEmpty(collection, paramName, customMessage);
     }
 
@@ -1444,10 +1417,7 @@ public inherited sharing class Guard {
      * @return The validated Map&lt;Object, Object&gt;.
      * @throws GuardException when collection is null or empty.
      */
-    public static Map<Object, Object> isNotEmpty(
-        Map<Object, Object> collection,
-        String paramName
-    ) {
+    public static Map<Object, Object> isNotEmpty(Map<Object, Object> collection, String paramName) {
         return GuardCollectionValidator.isNotEmpty(collection, paramName);
     }
 
@@ -1529,10 +1499,7 @@ public inherited sharing class Guard {
      * @return The validated Map&lt;String, Object&gt;.
      * @throws GuardException when collection is null or empty.
      */
-    public static Map<String, Object> isNotEmpty(
-        Map<String, Object> collection,
-        String paramName
-    ) {
+    public static Map<String, Object> isNotEmpty(Map<String, Object> collection, String paramName) {
         return GuardCollectionValidator.isNotEmpty(collection, paramName);
     }
 
@@ -1573,10 +1540,7 @@ public inherited sharing class Guard {
      * @return The validated Map&lt;String, String&gt;.
      * @throws GuardException when collection is null or empty.
      */
-    public static Map<String, String> isNotEmpty(
-        Map<String, String> collection,
-        String paramName
-    ) {
+    public static Map<String, String> isNotEmpty(Map<String, String> collection, String paramName) {
         return GuardCollectionValidator.isNotEmpty(collection, paramName);
     }
 
@@ -2242,11 +2206,7 @@ public inherited sharing class Guard {
      * @return The validated Salesforce Id.
      * @throws GuardException when recordId is null or belongs to a different SObjectType.
      */
-    public static Id isIdOfType(
-        Id recordId,
-        Schema.SObjectType expectedType,
-        String paramName
-    ) {
+    public static Id isIdOfType(Id recordId, Schema.SObjectType expectedType, String paramName) {
         return GuardSObjectValidator.isIdOfType(recordId, expectedType, paramName);
     }
 

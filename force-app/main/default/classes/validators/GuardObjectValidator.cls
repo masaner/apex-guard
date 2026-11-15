@@ -109,12 +109,7 @@ public inherited sharing class GuardObjectValidator {
             String effectiveMessage = String.isNotBlank(message)
                 ? message
                 : 'Condition must evaluate to true.';
-            GuardContext.fail(
-                effectiveMessage,
-                null,
-                GuardException.ERR_TRUE_EXPECTED,
-                condition
-            );
+            GuardContext.fail(effectiveMessage, null, GuardException.ERR_TRUE_EXPECTED, condition);
         }
         return true;
     }
@@ -148,12 +143,7 @@ public inherited sharing class GuardObjectValidator {
             String effectiveMessage = String.isNotBlank(message)
                 ? message
                 : 'Condition must evaluate to false.';
-            GuardContext.fail(
-                effectiveMessage,
-                null,
-                GuardException.ERR_FALSE_EXPECTED,
-                condition
-            );
+            GuardContext.fail(effectiveMessage, null, GuardException.ERR_FALSE_EXPECTED, condition);
         }
         return false;
     }

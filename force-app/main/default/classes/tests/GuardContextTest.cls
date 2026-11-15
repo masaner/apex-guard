@@ -118,7 +118,10 @@ private class GuardContextTest {
 
                 Map<String, Object> serialized = ex.toMap();
                 System.Assert.areEqual('quantity', serialized.get('paramName'));
-                System.Assert.areEqual(GuardException.ERR_GREATER_THAN, serialized.get('errorCode'));
+                System.Assert.areEqual(
+                    GuardException.ERR_GREATER_THAN,
+                    serialized.get('errorCode')
+                );
                 System.Assert.areEqual('REST', serialized.get('quiddity'));
                 System.Assert.areEqual('REST', serialized.get('executionContext'));
                 System.Assert.isNotNull(JSON.serialize(serialized));
@@ -159,7 +162,10 @@ private class GuardContextTest {
             } catch (GuardException ex) {
                 System.Assert.isNotNull(handler.lastFailure);
                 System.Assert.areEqual('jobKey', handler.lastFailure.paramName);
-                System.Assert.areEqual(GuardException.ERR_BLANK_STRING, handler.lastFailure.errorCode);
+                System.Assert.areEqual(
+                    GuardException.ERR_BLANK_STRING,
+                    handler.lastFailure.errorCode
+                );
                 System.Assert.areEqual(System.Quiddity.QUEUEABLE, handler.lastFailure.quiddity);
                 System.Assert.areEqual('QUEUEABLE', handler.lastFailure.executionContext);
             }

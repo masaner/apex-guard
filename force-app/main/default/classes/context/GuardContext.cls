@@ -294,11 +294,7 @@ public inherited sharing class GuardContext {
         ) {
             GuardContext.setLwcMode(true);
             try {
-                return GuardNumericValidator.isGreaterThanOrEqualTo(
-                    value,
-                    minInclusive,
-                    paramName
-                );
+                return GuardNumericValidator.isGreaterThanOrEqualTo(value, minInclusive, paramName);
             } finally {
                 GuardContext.setLwcMode(this.previousForceLwcMode);
             }
@@ -329,18 +325,10 @@ public inherited sharing class GuardContext {
          * @return Validated Decimal value.
          * @throws AuraHandledException when value is null or > maxInclusive.
          */
-        public Decimal isLessThanOrEqualTo(
-            Decimal value,
-            Decimal maxInclusive,
-            String paramName
-        ) {
+        public Decimal isLessThanOrEqualTo(Decimal value, Decimal maxInclusive, String paramName) {
             GuardContext.setLwcMode(true);
             try {
-                return GuardNumericValidator.isLessThanOrEqualTo(
-                    value,
-                    maxInclusive,
-                    paramName
-                );
+                return GuardNumericValidator.isLessThanOrEqualTo(value, maxInclusive, paramName);
             } finally {
                 GuardContext.setLwcMode(this.previousForceLwcMode);
             }

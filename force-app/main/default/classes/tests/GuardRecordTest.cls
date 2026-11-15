@@ -136,7 +136,11 @@ private class GuardRecordTest {
             .isNotZero(1, 'num');
         System.Assert.isTrue(passing.isValid());
 
-        Account failingAcc = new Account(Name = 'Bad', AnnualRevenue = 1000, NumberOfEmployees = 500);
+        Account failingAcc = new Account(
+            Name = 'Bad',
+            AnnualRevenue = 1000,
+            NumberOfEmployees = 500
+        );
         GuardRecord failing = Guard.onRecord(failingAcc)
             .isNull(Account.Name)
             .isNotEmpty(Account.Description)
