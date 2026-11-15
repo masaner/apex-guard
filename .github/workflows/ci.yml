@@ -1,0 +1,73 @@
+name: ApexGuard CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-and-format:
+    name: Prettier Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install devDependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check formatting with Prettier
+        run: npx prettier --check "force-app/**/*.{cls,trigger}" "*.{json,md}" "docs/**/*.md" ".github/**/*.md"
+
+  sfdx-structure-check:
+    name: SFDX Metadata & Org Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate sfdx-project.json and Apex meta XML companions
+        run: |
+          node -e "
+            const fs = require('fs');
+            const cfg = JSON.parse(fs.readFileSync('sfdx-project.json', 'utf8'));
+            if (!cfg.packageDirectories || !cfg.sourceApiVersion) {
+              throw new Error('Invalid sfdx-project.json');
+            }
+            console.log('Validated sfdx-project.json (API v' + cfg.sourceApiVersion + ')');
+          "
+          missing=0
+          while IFS= read -r cls; do
+            if [ ! -f "${cls}-meta.xml" ]; then
+              echo "::error file=${cls}::Missing companion ${cls}-meta.xml"
+              missing=1
+            fi
+          done < <(find force-app -type f -name '*.cls')
+          exit "$missing"
+
+      - name: Install Salesforce CLI (if org secret configured)
+        if: ${{ secrets.SFDX_AUTH_URL != '' }}
+        run: npm install -g @salesforce/cli
+
+      - name: Authenticate target Salesforce org
+        if: ${{ secrets.SFDX_AUTH_URL != '' }}
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+        run: |
+          printf '%s' "$SFDX_AUTH_URL" > sfdx-auth.txt
+          sf org login sfdx-url --sfdx-url-file sfdx-auth.txt --alias ci-org --set-default
+          rm -f sfdx-auth.txt
+
+      - name: Deploy & run Apex tests in target org
+        if: ${{ secrets.SFDX_AUTH_URL != '' }}
+        run: |
+          sf project deploy start --source-dir force-app --target-org ci-org --wait 10
+          sf apex run test --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest --code-coverage --result-format human --wait 10 --target-org ci-org

@@ -1,0 +1,16 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true,
+      "package": "ApexGuard",
+      "versionName": "ver 1.0",
+      "versionNumber": "1.0.0.NEXT",
+      "versionDescription": "Zero-dependency Apex Guard Clause library with universal execution-context support."
+    }
+  ],
+  "name": "ApexGuard",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "62.0"
+}

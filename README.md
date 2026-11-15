@@ -1,0 +1,598 @@
+<div align="center">
+
+<a href="#why-apexguard">
+  <img src="./docs/assets/apexguard-banner.svg" alt="ApexGuard — Fail-Fast, Context-Aware Guard Clauses for Salesforce Apex" width="100%" />
+</a>
+
+<br />
+<br />
+
+[![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v62.0-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://developer.salesforce.com/docs)
+[![Apex Tests](https://img.shields.io/badge/Tests-23%2F23%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
+[![Core Coverage](https://img.shields.io/badge/Core%20Coverage-96%25%2B-059669?style=for-the-badge)](#test-coverage)
+[![Governor Limits](https://img.shields.io/badge/SOQL%20%2F%20DML-0%20Queries%20%7C%200%20DML-0284C7?style=for-the-badge)](#architecture)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-6366F1?style=for-the-badge)](#quick-start)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
+
+<br />
+
+**Fail-fast, self-documenting guard clauses that adapt natively across every Salesforce execution context.**
+
+[Why ApexGuard?](#why-apexguard) •
+[Architecture](#architecture) •
+[Quick Start](#quick-start) •
+[Examples by Context](#examples-by-context) •
+[API Reference](#api-reference) •
+[Test Coverage](#test-coverage) •
+[Documentation](#documentation) •
+[Contributing](#contributing)
+
+</div>
+
+---
+
+## Why ApexGuard?
+
+Enterprise Apex codebases quickly accumulate defensive `if/else` pyramids (the **"arrow anti-pattern"**), inconsistent exception messages, LWC `"Script-thrown exception"` bugs, and partial-DML trigger crashes.
+
+**ApexGuard**—inspired by Microsoft's `.NET CommunityToolkit.Diagnostics.Guard`—replaces boilerplate defensive branching with a single, positive-assertion `Guard` facade featuring **zero external dependencies**, **zero SOQL/DML**, and **universal runtime awareness**.
+
+<table>
+<tr>
+<th width="50%">Before: The Arrow Anti-Pattern (29 Lines, 4 Nesting Levels)</th>
+<th width="50%">After: ApexGuard (7 Lines, 0 Nesting, Pass-Through)</th>
+</tr>
+<tr>
+<td>
+
+```apex
+public Id processOrder(
+    String accountIdStr,
+    OrderInput input,
+    List<OrderItemInput> items
+) {
+    if (String.isNotBlank(accountIdStr)) {
+        Id parsedId;
+        try {
+            parsedId = Id.valueOf(accountIdStr);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                'Invalid accountIdStr'
+            );
+        }
+        if (parsedId.getSObjectType() == Account.SObjectType) {
+            if (input != null) {
+                if (input.amount != null && input.amount > 0) {
+                    if (items != null && !items.isEmpty()) {
+                        return submitOrder(parsedId, input, items);
+                    } else {
+                        throw new IllegalArgumentException('No items');
+                    }
+                } else {
+                    throw new IllegalArgumentException('Bad amount');
+                }
+            } else {
+                throw new IllegalArgumentException('Null input');
+            }
+        } else {
+            throw new IllegalArgumentException('Not an Account Id');
+        }
+    } else {
+        throw new IllegalArgumentException('Blank accountIdStr');
+    }
+}
+```
+
+</td>
+<td>
+
+```apex
+public Id processOrder(
+    String accountIdStr,
+    OrderInput input,
+    List<OrderItemInput> items
+) {
+    Id accountId = Guard.isIdOfType(
+        Guard.isValidId(accountIdStr, 'accountIdStr'),
+        Account.SObjectType,
+        'accountIdStr'
+    );
+    Guard.isNotNull(input, 'input');
+    Guard.isGreaterThan(input.amount, 0, 'input.amount');
+    Guard.isNotEmpty(items, 'items');
+
+    return submitOrder(accountId, input, items);
+}
+```
+
+> **Error produced automatically on invalid amount `-5`:**
+>
+> `GuardException: Parameter 'input.amount' must be greater than 0, but was -5.`
+>
+> Includes structured `getParamName()`, `getErrorCode()`, `getActualValue()`, `getQuiddity()`, `getExecutionContext()`, and `toMap()`.
+
+</td>
+</tr>
+</table>
+
+| Metric | Legacy `if/else` Validation | **ApexGuard (`Guard`)** |
+| :--- | :--- | :--- |
+| **Precondition Lines** | 25–35 lines per service method | **1 line per invariant** |
+| **Cyclomatic Nesting Depth** | 3–5 levels deep | **Flat (0 levels)** |
+| **Assignment & Validation** | Two separate statements | **Single-line pass-through return values** |
+| **LWC Error Surface** | Often fails with `"Script-thrown exception"` | **Auto `AuraHandledException` + `setMessage()`** |
+| **Trigger Bulk Validation** | Manual `addError()` boilerplate per field | **Fluent `Guard.onRecord(rec)` partial-DML builder** |
+| **SOQL / DML Overhead** | Custom metadata queries in some frameworks | **0 SOQL Queries / 0 DML Statements** |
+
+> [!TIP]
+> **Positive Assertion Naming + Pass-Through Return Values:** Every `Guard` method states the **valid condition required to continue** (`Guard.isNotBlank`, `Guard.isGreaterThan`, `Guard.isIdOfType`) and returns the validated value so you can check and assign in one clean expression:
+> `this.accountId = Guard.isValidId(rawId, 'rawId');`
+
+---
+
+## Architecture
+
+At validation failure time, `GuardContext` inspects **`Trigger.isExecuting`** and **`System.Request.getCurrent().getQuiddity()`** (with zero SOQL or DML) and routes failures cleanly for the active Salesforce runtime:
+
+```mermaid
+flowchart LR
+    Caller["Apex / Trigger / LWC / Flow / REST"] --> Facade["Guard.cls (Public Facade)"]
+    Facade --> Validators["Modular Validators (Object, String, Numeric, Collection, SObject)"]
+    Validators -->|"Validation Fails"| Context["GuardContext.cls (Quiddity and Trigger Detection)"]
+
+    Context -->|"Optional Hook"| Hook["IGuardFailureHandler (Nebula Logger / Telemetry)"]
+
+    Context -->|"SYNCHRONOUS, REST, BATCH, QUEUEABLE"| StandardEx["GuardException (paramName, errorCode, toMap)"]
+    Context -->|"Quiddity.AURA or Guard.forLwc"| AuraEx["AuraHandledException (setMessage pre-called)"]
+    Facade -->|"Guard.onRecord"| TriggerErr["GuardRecord.cls (SObject.addError for partial DML)"]
+    Flow["Flow Builder / Agentforce"] --> Invocable["GuardFlowAction.cls (@InvocableMethod)"]
+    Invocable -->|"Throw on failure: true"| FaultPath["Flow Fault Path"]
+    Invocable -->|"Throw on failure: false"| DecisionOut["Result (isValid, errorMessage, errorCode)"]
+```
+
+### Modular SFDX Source Layout
+
+Contributors can extend validators, execution-context adapters, or tests cleanly without merge conflicts in `Guard.cls`:
+
+<details>
+<summary><strong>Click to expand repository structure</strong></summary>
+
+```text
+force-app/main/default/classes/
+├── core/
+│   ├── Guard.cls                     # Single public static facade + pass-through signatures
+│   └── GuardRecord.cls               # Non-throwing fluent SObject.addError() builder for Triggers
+├── context/
+│   ├── GuardContext.cls              # Quiddity & Trigger runtime detection + LwcScope + dispatch
+│   └── IGuardFailureHandler.cls      # Global failure hook interface (Nebula Logger, telemetry)
+├── exceptions/
+│   └── GuardException.cls            # Structured exception (paramName, errorCode, toMap())
+├── validators/
+│   ├── GuardObjectValidator.cls      # Nullability & Boolean assertions
+│   ├── GuardStringValidator.cls      # Empty, Blank, Exact/Max Length, Regex
+│   ├── GuardNumericValidator.cls     # Greater/Less Than, Range, NotZero (Decimal/Integer/Long)
+│   ├── GuardCollectionValidator.cls  # List, Set (Id/String/Integer/Object), Map overloads
+│   └── GuardSObjectValidator.cls     # isValidId, isIdOfType, isSObjectType, hasPopulatedField
+├── invocable/
+│   └── GuardFlowAction.cls           # Bulkified @InvocableMethod for Flows & Agentforce
+└── tests/
+    ├── GuardTest.cls                 # Core validators, boundary cases, custom messages/exceptions
+    ├── GuardContextTest.cls          # Quiddity.AURA, LwcScope, REST/Async metadata, hooks
+    ├── GuardRecordTest.cls           # Partial DML, field/record addError(), sparse SOQL isSet()
+    └── GuardFlowActionTest.cls       # Bulk requests, Flow Fault paths, Decision outputs
+```
+
+</details>
+
+---
+
+## Quick Start
+
+### Deploy via Salesforce CLI (`sf`)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/<your-org>/apex-guard.git
+cd apex-guard
+
+# 2. Deploy all classes to your Scratch Org or Sandbox
+sf project deploy start --source-dir force-app --target-org my-org
+
+# 3. Verify all 23 unit tests and code coverage
+sf apex run test \
+  --tests GuardTest GuardContextTest GuardRecordTest GuardFlowActionTest \
+  --code-coverage \
+  --result-format human \
+  --wait 10 \
+  --target-org my-org
+```
+
+> **Unlocked Package Ready:** [sfdx-project.json](sfdx-project.json) ships pre-configured for the `ApexGuard` package (`sourceApiVersion: 62.0`).
+
+---
+
+## Examples by Context
+
+### 1. Apex Services, Constructors & Selectors
+
+Use single-line pass-through return values in constructors, domain objects, and selectors:
+
+```apex
+public with sharing class InvoiceCalculatorService {
+    private final Id accountId;
+    private final Decimal taxRate;
+    private final String currencyCode;
+
+    public InvoiceCalculatorService(
+        String rawAccountId,
+        Decimal taxRate,
+        String currencyCode,
+        Account billedAccount
+    ) {
+        this.accountId = Guard.isIdOfType(
+            Guard.isValidId(rawAccountId, 'rawAccountId'),
+            Account.SObjectType,
+            'rawAccountId'
+        );
+        this.taxRate = Guard.isInRange(taxRate, 0, 1, 'taxRate');
+        this.currencyCode = Guard.hasLengthEqualTo(
+            Guard.isNotBlank(currencyCode, 'currencyCode'),
+            3,
+            'currencyCode'
+        );
+
+        // Safely verifies field is BOTH queried/set in memory AND non-null
+        Guard.hasPopulatedField(billedAccount, Account.BillingCountry, 'billedAccount');
+    }
+}
+```
+
+> [!IMPORTANT]
+> **Preventing Sparse-SOQL Crashes (`SObject.isSet()`):** Calling `record.get(field)` on an unqueried field throws `System.SObjectException`. Both `Guard.hasPopulatedField(...)` and `Guard.onRecord(...)` inspect `record.isSet(field)` first and convert missing fields into clean validation errors (`GUARD_UNPOPULATED_FIELD` or field `addError`).
+
+---
+
+### 2. Lightning Web Components (`@AuraEnabled` + LWC JS)
+
+When Apex executes inside an Aura/LWC request (`System.Quiddity.AURA`), `Guard` **automatically** throws `AuraHandledException` instead of `GuardException`. You can also invoke `Guard.forLwc()` explicitly in shared helper methods or tests.
+
+```apex
+// Apex Controller — BudgetController.cls
+public with sharing class BudgetController {
+    @AuraEnabled
+    public static Account updateQuarterlyBudget(String accountIdStr, Decimal budget) {
+        // Explicit scope or automatic Quiddity.AURA detection — both call setMessage()!
+        Id accountId = Guard.forLwc().isIdOfType(
+            Guard.forLwc().isValidId(accountIdStr, 'accountIdStr'),
+            Account.SObjectType,
+            'accountIdStr'
+        );
+        Guard.forLwc().isGreaterThan(budget, 0, 'budget');
+
+        Account acc = new Account(Id = accountId, AnnualRevenue = budget);
+        update as user acc;
+        return acc;
+    }
+}
+```
+
+```javascript
+// Lightning Web Component — budgetEditor.js
+import { LightningElement } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import updateQuarterlyBudget from '@salesforce/apex/BudgetController.updateQuarterlyBudget';
+
+export default class BudgetEditor extends LightningElement {
+    async handleSave() {
+        try {
+            await updateQuarterlyBudget({
+                accountIdStr: this.recordId,
+                budget: this.budgetAmount
+            });
+        } catch (error) {
+            // Displays the exact message: "Parameter 'budget' must be greater than 0, but was -500."
+            const message = error?.body?.message || 'Unexpected error';
+            this.dispatchEvent(
+                new ShowToastEvent({ title: 'Validation Error', message, variant: 'error' })
+            );
+        }
+    }
+}
+```
+
+> [!NOTE]
+> **Solving the `"Script-thrown exception"` Trap:** In Salesforce Apex, `throw new AuraHandledException(msg)` omits `msg` unless `auraEx.setMessage(msg)` is called immediately afterward. `GuardContext.createAuraHandledException()` always invokes `setMessage()`, guaranteeing readable client toasts and deterministic `@IsTest` assertions.
+
+---
+
+### 3. Apex Triggers & Partial DML (`Guard.onRecord`)
+
+Combine **fail-fast structural guards** (`Guard.isNotEmpty(Trigger.new, ...)`) with **non-throwing record validation** (`Guard.onRecord(record)`), attaching field-level `addError()` messages directly inside Lightning Record Pages while letting valid records succeed under `Database.insert(records, false)`.
+
+```apex
+public with sharing class AccountTriggerHandler {
+    public static void beforeSave(List<Account> newAccounts) {
+        // Structural precondition: fails fast if called improperly with empty/null batch
+        Guard.isNotEmpty(newAccounts, 'newAccounts');
+
+        for (Account acc : newAccounts) {
+            Guard.onRecord(acc)
+                .isNotBlank(Account.Name, 'Account Name is required.')
+                .isGreaterThan(Account.AnnualRevenue, 0, 'Annual Revenue must be positive.')
+                .hasMaxLength(Account.TickerSymbol, 5)
+                .matchesRegex(Account.AccountNumber, '^ACC-[0-9]{4}$')
+                .hasPopulatedField(Account.Industry);
+        }
+    }
+}
+```
+
+<details>
+<summary><strong>See Partial DML & Inspection Example (<code>Database.SaveResult</code> + <code>GuardRecord.hasErrors()</code>)</strong></summary>
+
+```apex
+GuardRecord validator = Guard.onRecord(acc)
+    .isNotBlank(Account.Name, 'Account Name is required.')
+    .isInRange(Account.NumberOfEmployees, 1, 100000);
+
+if (validator.hasErrors()) {
+    List<String> chronologicalMessages = validator.getErrorMessages();
+    // Errors are already attached to Account.Name / Account.NumberOfEmployees via SObject.addError()
+}
+
+// Valid records in the same Trigger/DML batch commit normally!
+Database.SaveResult[] results = Database.insert(accounts, false);
+```
+
+</details>
+
+---
+
+### 4. Declarative Flows & Agentforce Actions (`GuardFlowAction`)
+
+Search for **`Validate Input (ApexGuard)`** (`GuardFlowAction`) in Flow Builder or Agentforce Action Configuration:
+
+| Flow Use Case | `Throw On Failure` Setting | Behavior |
+| :--- | :---: | :--- |
+| **Fail-Fast / Fault Path** | `true` *(default)* | Rolls back transaction on invalid input and triggers your Flow **Fault Connector** with full diagnostic details. |
+| **Decision Branching / Agentforce Loop** | `false` | Never throws! Returns `isValid = false`, `errorMessage`, `errorCode`, `paramName`, and `executionContext` so Flows route via Decision elements or Agentforce prompts the user to fix the input. |
+
+<details>
+<summary><strong>Click to view all Flow Action Inputs, Outputs &amp; 18 Supported Rules</strong></summary>
+
+#### Invocable Request Inputs (`GuardFlowAction.Request`)
+- `rule` *(required)*: Rule identifier (case-insensitive)
+- `paramName`: Logical parameter or field label for diagnostics
+- `stringValue`, `numericValue`, `booleanValue`, `recordValue`: Typed value inputs
+- `comparisonValue`: Regex pattern, SObject API name (e.g., `Account`), or string-encoded threshold
+- `minValue`, `maxValue`, `integerValue`: Numeric range or string length bounds
+- `customMessage`: Optional custom override message
+- `throwOnFailure`: Boolean (`true` default = throw; `false` = return `Result`)
+
+#### Invocable Response Outputs (`GuardFlowAction.Result`)
+- `isValid` (`Boolean`), `errorMessage` (`String`), `errorCode` (`String`), `paramName` (`String`), `executionContext` (`String`)
+
+#### All 18 Supported Flow / Agentforce Rules
+`IS_NOT_NULL` • `IS_NULL` • `IS_TRUE` • `IS_FALSE` • `IS_NOT_EMPTY` • `IS_NOT_BLANK` • `HAS_LENGTH_EQUAL_TO` • `HAS_MAX_LENGTH` • `MATCHES_REGEX` • `IS_GREATER_THAN` • `IS_GREATER_THAN_OR_EQUAL_TO` • `IS_LESS_THAN` • `IS_LESS_THAN_OR_EQUAL_TO` • `IS_IN_RANGE` • `IS_NOT_ZERO` • `IS_VALID_ID` • `IS_ID_OF_TYPE` • `IS_SOBJECT_TYPE`
+
+</details>
+
+---
+
+### 5. REST APIs & Asynchronous Apex (`TransactionFinalizer`)
+
+`GuardException` captures runtime metadata automatically (`getParamName()`, `getErrorCode()`, `getActualValue()`, `getQuiddity()`, `getExecutionContext()`, and `toMap()`), eliminating fragile exception-message string parsing in APIs and Async finalizers.
+
+```apex
+@RestResource(urlMapping='/v1/orders/*')
+global with sharing class OrderRestEndpoint {
+    @HttpPost
+    global static void createOrder(String accountId, Decimal amount) {
+        RestResponse res = RestContext.response;
+        try {
+            Id validAccountId = Guard.isIdOfType(
+                Guard.isValidId(accountId, 'accountId'),
+                Account.SObjectType,
+                'accountId'
+            );
+            Guard.isGreaterThan(amount, 0, 'amount');
+
+            // Process order...
+            res.statusCode = 201;
+        } catch (GuardException ex) {
+            res.statusCode = 400;
+            res.addHeader('Content-Type', 'application/json');
+            res.responseBody = Blob.valueOf(JSON.serialize(ex.toMap()));
+        }
+    }
+}
+```
+
+**Structured JSON Error Response (`ex.toMap()`):**
+
+```json
+{
+  "message": "Parameter 'amount' must be greater than 0, but was -25.",
+  "paramName": "amount",
+  "errorCode": "GUARD_GREATER_THAN",
+  "actualValue": -25,
+  "quiddity": "REST",
+  "executionContext": "REST"
+}
+```
+
+<details>
+<summary><strong>See Queueable + <code>System.Finalizer</code> Async Diagnostics Example</strong></summary>
+
+```apex
+public class OrderSyncQueueable implements Queueable, System.Finalizer {
+    private final Id orderId;
+
+    public OrderSyncQueueable(String rawOrderId) {
+        this.orderId = Guard.isValidId(rawOrderId, 'rawOrderId');
+    }
+
+    public void execute(QueueableContext context) {
+        System.attachFinalizer(this);
+        // Perform sync...
+    }
+
+    public void execute(FinalizerContext context) {
+        if (context.getResult() == ParentJobResult.UNHANDLED_EXCEPTION) {
+            Exception ex = context.getException();
+            if (ex instanceof GuardException) {
+                Map<String, Object> diagnostics = ((GuardException) ex).toMap();
+                // Publish structured GuardException metadata to Platform Event / Log object
+            }
+        }
+    }
+}
+```
+
+</details>
+
+---
+
+### 6. Custom Domain Exceptions & Nebula Logger (`IGuardFailureHandler`)
+
+Override failures per call site with a custom message or domain `Exception`, or register a transaction-wide `IGuardFailureHandler` for **Nebula Logger** or global exception translation:
+
+```apex
+// Per-call custom Exception overload
+Guard.isGreaterThan(
+    availableCredit,
+    0,
+    new InsufficientCreditException('Customer credit balance is exhausted.')
+);
+
+// Per-call custom message (retains GuardException paramName, errorCode, & Quiddity)
+Guard.isNotBlank(externalKey, 'externalKey', 'External ERP key must be supplied.');
+```
+
+<details>
+<summary><strong>See Complete Nebula Logger &amp; Telemetry Hook Example (<code>IGuardFailureHandler</code>)</strong></summary>
+
+```apex
+public class NebulaGuardFailureHandler implements IGuardFailureHandler {
+    public void handleFailure(GuardContext.Failure failure) {
+        // Optional adapter — zero Nebula dependency in ApexGuard core:
+        // Logger.error(failure.message + ' | Context=' + failure.executionContext)
+        //       .addTag(failure.errorCode);
+        // Logger.saveLog();
+
+        // Or serialize full failure metadata safely:
+        System.debug(
+            LoggingLevel.ERROR,
+            JSON.serialize(failure.toGuardException().toMap())
+        );
+    }
+}
+
+// Register at transaction entry point (Trigger Dispatcher, REST Controller, Batch.start):
+Guard.setFailureHandler(new NebulaGuardFailureHandler());
+```
+
+</details>
+
+---
+
+## API Reference
+
+Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) supports three overloads: default diagnostic message `(..., paramName)`, custom message `(..., paramName, customMessage)`, and explicit exception `(..., customException)` (boolean assertions omit `paramName` and accept `message` or `customException`).
+
+| Category | Method | Returns | Error Code Constant |
+| :--- | :--- | :--- | :--- |
+| **Nullability** | `Guard.isNotNull(value, paramName)` | `Object` | `GUARD_NULL_VALUE` |
+| | `Guard.isNull(value, paramName)` | `Object` (`null`) | `GUARD_NOT_NULL_VALUE` |
+| **Boolean / State** | `Guard.isTrue(condition, message)` | `Boolean` (`true`) | `GUARD_TRUE_EXPECTED` |
+| | `Guard.isFalse(condition, message)` | `Boolean` (`false`) | `GUARD_FALSE_EXPECTED` |
+| **Strings** | `Guard.isNotEmpty(value, paramName)` | `String` | `GUARD_EMPTY_STRING` |
+| | `Guard.isNotBlank(value, paramName)` | `String` | `GUARD_BLANK_STRING` |
+| | `Guard.hasLengthEqualTo(value, expectedLength, paramName)` | `String` | `GUARD_STRING_LENGTH` |
+| | `Guard.hasMaxLength(value, maxLength, paramName)` | `String` | `GUARD_MAX_LENGTH` |
+| | `Guard.matchesRegex(value, regexPattern, paramName)` | `String` | `GUARD_REGEX_MISMATCH` |
+| **Numeric** | `Guard.isGreaterThan(value, minExclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_GREATER_THAN` |
+| *(`Decimal`, `Integer`, `Long`,* | `Guard.isGreaterThanOrEqualTo(value, minInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_GREATER_OR_EQUAL` |
+| *and `Double` widening)* | `Guard.isLessThan(value, maxExclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_LESS_THAN` |
+| | `Guard.isLessThanOrEqualTo(value, maxInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_LESS_OR_EQUAL` |
+| | `Guard.isInRange(value, minInclusive, maxInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_OUT_OF_RANGE` |
+| | `Guard.isNotZero(value, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_ZERO_VALUE` |
+| **Collections** | `Guard.isNotEmpty(collection, paramName)` | `List` / `Set` / `Map` | `GUARD_EMPTY_COLLECTION` |
+| *(Zero-copy Apex `Set` &* | `Guard.hasSizeEqualTo(collection, expectedSize, paramName)` | `List` / `Set` / `Map` | `GUARD_COLLECTION_SIZE` |
+| *`Map` overloads)* | `Guard.containsKey(inputMap, key, paramName)` | `Map` | `GUARD_MISSING_KEY` |
+| **Salesforce-Native** | `Guard.isValidId(value, paramName)` | `Id` | `GUARD_INVALID_ID` |
+| | `Guard.isIdOfType(recordId, expectedType, paramName)` | `Id` | `GUARD_ID_SOBJECT_TYPE` |
+| | `Guard.isSObjectType(record, expectedType, paramName)` | `SObject` | `GUARD_SOBJECT_TYPE` |
+| | `Guard.hasPopulatedField(record, field, paramName)` | `SObject` | `GUARD_UNPOPULATED_FIELD` |
+| **Context & Hooks** | `Guard.onRecord(record)` | `GuardRecord` | Field/Record `addError()` |
+| | `Guard.forLwc()` / `Guard.disableLwcMode()` | `GuardContext.LwcScope` / `void` | `AuraHandledException` |
+| | `Guard.setAutoDetectAuraQuiddity(enabled)` | `void` | Context config |
+| | `Guard.setFailureHandler(handler)` / `Guard.resetFailureHandler()` | `void` | `IGuardFailureHandler` |
+| | `Guard.resetContext()` | `void` | Resets transaction config |
+
+> [!TIP]
+> **Apex `Set` & `Map` Ergonomics:** Because Apex `Set<T>` is invariant and `Map<K, V>` keys are invariant, `Guard` ships explicit overloads for `Set<Id>`, `Set<String>`, `Set<Integer>`, `Set<Object>`, `Map<Id, SObject>`, `Map<String, Object>`, `Map<String, String>`, and `Map<Object, Object>`—zero wrapper allocations required (`Guard.isNotEmpty(accountIds, 'accountIds')` works directly!). Note: `hasSizeEqualTo` supports `List<Object>`, `Set<Id/String/Object>`, and `Map<Id, SObject>` / `Map<String, Object>` / `Map<Object, Object>`.
+
+<details>
+<summary><strong>Click to view all 23 Standardized Error Code Constants (<code>GuardException</code>)</strong></summary>
+
+| Constant | String Value | Constant | String Value |
+| :--- | :--- | :--- | :--- |
+| `GuardException.ERR_NULL_VALUE` | `'GUARD_NULL_VALUE'` | `GuardException.ERR_LESS_OR_EQUAL` | `'GUARD_LESS_OR_EQUAL'` |
+| `GuardException.ERR_NOT_NULL_VALUE` | `'GUARD_NOT_NULL_VALUE'` | `GuardException.ERR_OUT_OF_RANGE` | `'GUARD_OUT_OF_RANGE'` |
+| `GuardException.ERR_TRUE_EXPECTED` | `'GUARD_TRUE_EXPECTED'` | `GuardException.ERR_ZERO_VALUE` | `'GUARD_ZERO_VALUE'` |
+| `GuardException.ERR_FALSE_EXPECTED` | `'GUARD_FALSE_EXPECTED'` | `GuardException.ERR_EMPTY_COLLECTION` | `'GUARD_EMPTY_COLLECTION'` |
+| `GuardException.ERR_EMPTY_STRING` | `'GUARD_EMPTY_STRING'` | `GuardException.ERR_COLLECTION_SIZE` | `'GUARD_COLLECTION_SIZE'` |
+| `GuardException.ERR_BLANK_STRING` | `'GUARD_BLANK_STRING'` | `GuardException.ERR_MISSING_KEY` | `'GUARD_MISSING_KEY'` |
+| `GuardException.ERR_STRING_LENGTH` | `'GUARD_STRING_LENGTH'` | `GuardException.ERR_INVALID_ID` | `'GUARD_INVALID_ID'` |
+| `GuardException.ERR_MAX_LENGTH` | `'GUARD_MAX_LENGTH'` | `GuardException.ERR_ID_SOBJECT_TYPE` | `'GUARD_ID_SOBJECT_TYPE'` |
+| `GuardException.ERR_REGEX_MISMATCH` | `'GUARD_REGEX_MISMATCH'` | `GuardException.ERR_SOBJECT_TYPE` | `'GUARD_SOBJECT_TYPE'` |
+| `GuardException.ERR_GREATER_THAN` | `'GUARD_GREATER_THAN'` | `GuardException.ERR_UNPOPULATED_FIELD` | `'GUARD_UNPOPULATED_FIELD'` |
+| `GuardException.ERR_GREATER_OR_EQUAL` | `'GUARD_GREATER_OR_EQUAL'` | `GuardException.ERR_INVALID_GUARD_ARGUMENT` | `'GUARD_INVALID_ARGUMENT'` |
+| `GuardException.ERR_LESS_THAN` | `'GUARD_LESS_THAN'` | | |
+
+</details>
+
+---
+
+## Test Coverage
+
+Verified on Salesforce API `v62.0` (Test Run ID `707d200001FriQA` — **23/23 tests passing**, **100% pass rate**, **1,100 ms** total runtime):
+
+| Apex Class | Responsibility | Verified Coverage |
+| :--- | :--- | :---: |
+| [`GuardException.cls`](force-app/main/default/classes/exceptions/GuardException.cls) | Structured exception & `toMap()` serialization | **100%** |
+| [`GuardStringValidator.cls`](force-app/main/default/classes/validators/GuardStringValidator.cls) | String empty/blank/length/regex validation | **100%** |
+| [`GuardContext.cls`](force-app/main/default/classes/context/GuardContext.cls) | `Quiddity` & Trigger resolution + `LwcScope` + hooks | **99%** |
+| [`GuardObjectValidator.cls`](force-app/main/default/classes/validators/GuardObjectValidator.cls) | Object nullability & Boolean state assertions | **97%** |
+| [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) | Public facade entry point | **96%** |
+| [`GuardCollectionValidator.cls`](force-app/main/default/classes/validators/GuardCollectionValidator.cls) | List, Set & Map covariance validation | **95%** |
+| [`GuardNumericValidator.cls`](force-app/main/default/classes/validators/GuardNumericValidator.cls) | Bounds, inclusive range & non-zero checks | **95%** |
+| [`GuardSObjectValidator.cls`](force-app/main/default/classes/validators/GuardSObjectValidator.cls) | Id parsing, SObjectType & `isSet()` field checks | **94%** |
+| [`GuardRecord.cls`](force-app/main/default/classes/core/GuardRecord.cls) | Fluent Trigger `addError()` builder | **89%** |
+| [`GuardFlowAction.cls`](force-app/main/default/classes/invocable/GuardFlowAction.cls) | Flow & Agentforce `@InvocableMethod` | **83%** |
+
+---
+
+## Documentation
+
+| Guide | Topics Covered |
+| :--- | :--- |
+| [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
+| [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |
+| [Project Roadmap](ROADMAP.md) | Phase 1 completion checklist + **Phase 2 plans** (Python `apex-guard-codemod` static-analysis CLI, specialized Flow actions, Nebula Logger adapter) |
+| [Contributing Guide](CONTRIBUTING.md) | Coding conventions, Prettier formatting rules, how to add new validators & tests |
+
+---
+
+## Contributing
+
+Contributions are welcome! Whether adding a new validator domain (such as `GuardDateValidator` on the [Roadmap](ROADMAP.md)), improving Flow/Agentforce ergonomics, or expanding test coverage:
+
+1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and install dev tools (`npm install`).
+2. Format Apex and Markdown with `npm run prettier` (`npm run prettier:verify` runs in CI).
+3. Submit a Pull Request using our [PR Template](.github/PULL_REQUEST_TEMPLATE.md) or propose a new guard via [New Guard Proposal](.github/ISSUE_TEMPLATE/new_guard_proposal.md).
+
+## License
+
+Released under the [MIT License](LICENSE).

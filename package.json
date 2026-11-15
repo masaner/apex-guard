@@ -1,0 +1,16 @@
+{
+  "name": "apex-guard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-dependency, fail-fast Apex Guard Clause library inspired by .NET CommunityToolkit.Diagnostics.Guard.",
+  "scripts": {
+    "lint": "eslint force-app",
+    "prettier": "prettier --write \"**/*.{cls,trigger,md,json,yaml,yml}\"",
+    "prettier:verify": "prettier --check \"**/*.{cls,trigger,md,json,yaml,yml}\"",
+    "test:apex": "sf apex run test --code-coverage --result-format human --wait 10"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-apex": "^2.1.4"
+  }
+}

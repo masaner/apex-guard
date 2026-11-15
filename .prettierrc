@@ -1,0 +1,28 @@
+{
+  "trailingComma": "none",
+  "printWidth": 100,
+  "tabWidth": 4,
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": "**/lwc/**/*.html",
+      "options": { "parser": "lwc" }
+    },
+    {
+      "files": "*.{cmp,page,component}",
+      "options": { "parser": "html" }
+    },
+    {
+      "files": "*.cls",
+      "options": { "parser": "apex", "tabWidth": 4 }
+    },
+    {
+      "files": "*.trigger",
+      "options": { "parser": "apex", "tabWidth": 4 }
+    },
+    {
+      "files": "*.{json,md,yml,yaml}",
+      "options": { "tabWidth": 2 }
+    }
+  ]
+}
