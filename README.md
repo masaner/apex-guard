@@ -285,10 +285,19 @@ try {
 
 ## AI Agent Skills
 
-ApexGuard ships a full [Agent Skills](https://www.skills.sh/docs) catalog ([`skills/`](skills/README.md)) so AI coding agents (Antigravity, Claude Code, Cursor, GitHub Copilot, Codex, and others) can install, adopt, test, and extend ApexGuard using verified public APIs and Salesforce best practices:
+[![skills.sh](https://skills.sh/b/masaner/apex-guard)](https://www.skills.sh/masaner/apex-guard)
+
+ApexGuard publishes 7 official [Agent Skills](https://www.skills.sh/masaner/apex-guard) ([`skills/`](skills/README.md)) so **Antigravity** ([skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)), Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other `skills.sh`-compatible agents can install, adopt, test, and extend ApexGuard using verified public APIs:
 
 ```bash
+# Install project-scoped skills (writes ./.agents/skills/)
 npx skills add masaner/apex-guard
+
+# Or install globally for Antigravity
+npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
+
+# Preview all 7 skills before installing
+npx skills add masaner/apex-guard --list
 ```
 
 | Category | Skill | Coverage |
@@ -301,7 +310,9 @@ npx skills add masaner/apex-guard
 | **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns |
 | **Extending** | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md) | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants |
 
-See [`skills/README.md`](skills/README.md) and [`skills.sh.json`](skills.sh.json) for catalog details and Supported API Surface rules.
+* **Live skills.sh Page:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
+* **Dedicated Documentation Guide:** [AI Agent Skills Guide (`docs/ai-agent-skills.md`)](docs/ai-agent-skills.md)
+* **Catalog Manifest & API Policy:** [`skills/README.md`](skills/README.md) & [`skills.sh.json`](skills.sh.json)
 
 ---
 
@@ -687,7 +698,8 @@ Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 te
 
 | Guide | Topics Covered |
 | :--- | :--- |
-| [AI Agent Skills Catalog](skills/README.md) | `npx skills add masaner/apex-guard` — 7 specialized [skills.sh](https://skills.sh) guides covering install, usage, triggers, Flows, Nebula Logger, testing, and security |
+| [AI Agent Skills Guide (Antigravity & skills.sh)](docs/ai-agent-skills.md) | Installing on Antigravity (`npx skills add masaner/apex-guard`), [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard), sample prompts, and `skills.sh.json` validation |
+| [AI Agent Skills Catalog](skills/README.md) | Skill index table and Supported API Surface policy (`skills.sh`) |
 | [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod) |
 | [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
 | [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |

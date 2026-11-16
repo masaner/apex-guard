@@ -1,13 +1,24 @@
 # ApexGuard Skills
 
-This folder contains ApexGuard's [skills.sh](https://skills.sh) catalog. Each subfolder defines one specialized skill with a `SKILL.md` file covering installation, fail-fast defensive Apex patterns, Salesforce execution contexts, observability hooks, security/FLS governance, and unit testing. The top-level [`skills.sh.json`](../skills.sh.json) groups these skills into logical categories for the catalog page at [skills.sh/masaner/apex-guard](https://skills.sh/masaner/apex-guard).
+[![skills.sh](https://skills.sh/b/masaner/apex-guard)](https://www.skills.sh/masaner/apex-guard)
+
+This folder contains ApexGuard's [skills.sh](https://skills.sh) catalog. Each subfolder defines one specialized skill with a `SKILL.md` file covering installation, fail-fast defensive Apex patterns, Salesforce execution contexts, observability hooks, security/FLS governance, and unit testing. The top-level [`skills.sh.json`](../skills.sh.json) groups these skills into logical categories for the live catalog page at [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard).
+
+For setup walkthroughs and Antigravity sample prompts, see [`docs/ai-agent-skills.md`](../docs/ai-agent-skills.md).
 
 ## Installing These Skills
 
-Add all ApexGuard skills to your AI coding agent (Antigravity, Claude Code, Cursor, GitHub Copilot, Codex, and other [skills.sh](https://skills.sh/docs)-compatible tools) with a single command:
+Add all ApexGuard skills to your AI coding agent (**[Antigravity](https://www.skills.sh/agent/antigravity)**, Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other [skills.sh](https://skills.sh/docs)-compatible tools):
 
 ```bash
+# Install all 7 skills into ./.agents/skills/ (project scope)
 npx skills add masaner/apex-guard
+
+# Install globally for Antigravity (~/.agents/skills/)
+npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
+
+# Preview skills without installing
+npx skills add masaner/apex-guard --list
 ```
 
 ## Skills
