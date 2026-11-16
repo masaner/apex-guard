@@ -348,9 +348,18 @@ Phase 1 delivers the core zero-dependency SFDX library, context routing, schema 
 
 ## Get Involved
 
-`ApexGuard` is MIT-licensed, open source, and ready to deploy cleanly into any Salesforce DX project with zero third-party packages:
+`ApexGuard` is MIT-licensed, open source, and published as a promoted Second-Generation Unlocked Package (`ApexGuard@1.0.0-1`, `94%` package code coverage validated on Salesforce packaging build servers) with zero third-party dependencies:
+
+* **1-Click Install (Production / Developer Edition):** [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+* **1-Click Install (Sandbox / Scratch Org):** [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+
+Or install / deploy via Salesforce CLI (`sf`):
 
 ```bash
+# Install Released Unlocked Package v1.0.0-1
+sf package install --package 04td2000000WiM5AAK --wait 10 --target-org my-org
+
+# Or clone and deploy from source
 git clone https://github.com/masaner/apex-guard.git
 cd apex-guard
 sf project deploy start --source-dir force-app --target-org my-org

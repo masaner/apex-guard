@@ -17,6 +17,11 @@
 
 <br />
 
+[![Unlocked Package Installation (Production)](https://img.shields.io/badge/Unlocked%20Package%20Install-Production-0176D3?style=for-the-badge&logo=salesforce&logoColor=white)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+[![Unlocked Package Installation (Sandbox)](https://img.shields.io/badge/Unlocked%20Package%20Install-Sandbox-0284C7?style=for-the-badge&logo=salesforce&logoColor=white)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+
+<br />
+
 **Fail-fast, self-documenting guard clauses that adapt natively across every Salesforce execution context.**
 
 [Why ApexGuard?](#why-apexguard) •
@@ -193,7 +198,20 @@ force-app/main/default/
 
 ## Quick Start
 
-### Deploy via Salesforce CLI (`sf`)
+### Option 1: Install via Unlocked Package (`v1.0.0-1` — Released)
+
+Install directly into any org in one click (no CLI setup required):
+
+* [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+* [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+
+Or install via Salesforce CLI (`sf`):
+
+```bash
+sf package install --package 04td2000000WiM5AAK --wait 10 --target-org my-org
+```
+
+### Option 2: Deploy Source via Salesforce CLI (`sf`)
 
 ```bash
 # 1. Clone the repository
@@ -212,7 +230,7 @@ sf apex run test \
   --target-org my-org
 ```
 
-> **Unlocked Package Ready:** [sfdx-project.json](sfdx-project.json) ships pre-configured for the `ApexGuard` package (`sourceApiVersion: 62.0`).
+> **2GP Unlocked Package (`0Hod2000000768jCAA`):** Configured in [sfdx-project.json](sfdx-project.json) (`ApexGuard@1.0.0-1` -> `04td2000000WiM5AAK`, `sourceApiVersion: 62.0`, 94% package code coverage validated).
 
 ---
 
