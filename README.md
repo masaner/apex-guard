@@ -20,6 +20,7 @@
 
 [![Unlocked Package Installation (Production)](https://img.shields.io/badge/Unlocked%20Package%20Install-Production-0176D3?style=for-the-badge&logo=salesforce&logoColor=white)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 [![Unlocked Package Installation (Sandbox)](https://img.shields.io/badge/Unlocked%20Package%20Install-Sandbox-0284C7?style=for-the-badge&logo=salesforce&logoColor=white)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+[![How to Add & Use AI Agent Skills](https://img.shields.io/badge/How%20To%20Add%20%26%20Use-Agent%20Skills-8B5CF6?style=for-the-badge)](docs/how-to-use-skills.md)
 
 <br />
 
@@ -287,18 +288,32 @@ try {
 
 [![skills.sh](https://skills.sh/b/masaner/apex-guard)](https://www.skills.sh/masaner/apex-guard)
 
-ApexGuard publishes 7 official [Agent Skills](https://www.skills.sh/masaner/apex-guard) ([`skills/`](skills/README.md)) so **Antigravity** ([skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)), Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other `skills.sh`-compatible agents can install, adopt, test, and extend ApexGuard using verified public APIs:
+ApexGuard publishes **12 official [Agent Skills](https://www.skills.sh/masaner/apex-guard)** ([`skills/`](skills/README.md)) so **Antigravity** ([skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)), Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other `skills.sh`-compatible agents can install, adopt, verify, and extend ApexGuard cleanly:
+
+> **New to AI Agent Skills?** Start with our step-by-step **[Quick How-To Guide (`docs/how-to-use-skills.md`)](docs/how-to-use-skills.md)** covering how to add the skills, run multi-round Q&A proposals, and move specs from `specs/active/` to `specs/archived/`.
 
 ```bash
-# Install project-scoped skills (writes ./.agents/skills/)
+# Install all 12 project-scoped skills (writes ./.agents/skills/)
 npx skills add masaner/apex-guard
 
 # Or install globally for Antigravity
 npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
 
-# Preview all 7 skills before installing
+# Preview all 12 skills before installing
 npx skills add masaner/apex-guard --list
 ```
+
+### Spec-Driven Workflow Skills (`Propose → Explore → Apply → Verify → Archive`)
+
+| Stage | Skill | Purpose & Output Artifact |
+| :--- | :--- | :--- |
+| **1. Propose** | [`apex-guard-propose`](skills/apex-guard-propose/SKILL.md) | Listens to user intent, runs multi-round Q&A, creates `specs/active/<timestamp>-<slug>/01-proposal.md`, and auto-transitions to Explore on `continue`. |
+| **2. Explore** | [`apex-guard-explore`](skills/apex-guard-explore/SKILL.md) | Zero-hallucination audit of classes/org + spacing/newline/style fingerprint, writes ordered checklist in `02-exploration.md`, and auto-transitions to Apply. |
+| **3. Apply** | [`apex-guard-apply`](skills/apex-guard-apply/SKILL.md) | Executes every checklist step 1-by-1 matching existing codebase style & org conventions, logs `03-apply.md`, and auto-transitions to Verify. |
+| **4. Verify** | [`apex-guard-verify`](skills/apex-guard-verify/SKILL.md) | Confirms every Proposal/Explore item against applied code & Apex tests in `04-verification.md`, then invites the user to run Archive. |
+| **5. Archive** | [`apex-guard-archive`](skills/apex-guard-archive/SKILL.md) | Synthesizes all 4 files into a single permanent knowledge record in `specs/archived/<timestamp>-<slug>.md` and cleans up `specs/active/`. |
+
+### Platform & Governance Skills
 
 | Category | Skill | Coverage |
 | :--- | :--- | :--- |
@@ -310,9 +325,10 @@ npx skills add masaner/apex-guard --list
 | **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns |
 | **Extending** | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md) | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants |
 
+* **Quick How-To Guide:** [How to Add & Use AI Agent Skills (`docs/how-to-use-skills.md`)](docs/how-to-use-skills.md)
 * **Live skills.sh Page:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
-* **Dedicated Documentation Guide:** [AI Agent Skills Guide (`docs/ai-agent-skills.md`)](docs/ai-agent-skills.md)
-* **Catalog Manifest & API Policy:** [`skills/README.md`](skills/README.md) & [`skills.sh.json`](skills.sh.json)
+* **Specs Workspace:** [`specs/README.md`](specs/README.md) (`specs/active/` & `specs/archived/`)
+* **Full Reference & Manifest:** [`docs/ai-agent-skills.md`](docs/ai-agent-skills.md) • [`skills/README.md`](skills/README.md) • [`skills.sh.json`](skills.sh.json)
 
 ---
 
@@ -698,8 +714,10 @@ Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 te
 
 | Guide | Topics Covered |
 | :--- | :--- |
+| [Quick How-To Guide: Adding & Using Skills](docs/how-to-use-skills.md) | 30-second install + full `Propose → Explore → Apply → Verify → Archive` spec workflow walkthrough |
 | [AI Agent Skills Guide (Antigravity & skills.sh)](docs/ai-agent-skills.md) | Installing on Antigravity (`npx skills add masaner/apex-guard`), [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard), sample prompts, and `skills.sh.json` validation |
-| [AI Agent Skills Catalog](skills/README.md) | Skill index table and Supported API Surface policy (`skills.sh`) |
+| [AI Agent Skills Catalog](skills/README.md) | Full 12-skill index and Supported API Surface policy (`skills.sh`) |
+| [Specifications Workspace (`specs/`)](specs/README.md) | Active in-progress sessions (`specs/active/`) and consolidated permanent archives (`specs/archived/`) |
 | [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod) |
 | [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
 | [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |

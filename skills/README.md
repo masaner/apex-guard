@@ -4,14 +4,14 @@
 
 This folder contains ApexGuard's [skills.sh](https://skills.sh) catalog. Each subfolder defines one specialized skill with a `SKILL.md` file covering installation, fail-fast defensive Apex patterns, Salesforce execution contexts, observability hooks, security/FLS governance, and unit testing. The top-level [`skills.sh.json`](../skills.sh.json) groups these skills into logical categories for the live catalog page at [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard).
 
-For setup walkthroughs and Antigravity sample prompts, see [`docs/ai-agent-skills.md`](../docs/ai-agent-skills.md).
+For setup walkthroughs, spec workflow diagrams, and Antigravity sample prompts, see [`docs/how-to-use-skills.md`](../docs/how-to-use-skills.md) and [`docs/ai-agent-skills.md`](../docs/ai-agent-skills.md).
 
 ## Installing These Skills
 
-Add all ApexGuard skills to your AI coding agent (**[Antigravity](https://www.skills.sh/agent/antigravity)**, Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other [skills.sh](https://skills.sh/docs)-compatible tools):
+Add all 12 ApexGuard skills to your AI coding agent (**[Antigravity](https://www.skills.sh/agent/antigravity)**, Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other [skills.sh](https://skills.sh/docs)-compatible tools):
 
 ```bash
-# Install all 7 skills into ./.agents/skills/ (project scope)
+# Install all 12 skills into ./.agents/skills/ (project scope)
 npx skills add masaner/apex-guard
 
 # Install globally for Antigravity (~/.agents/skills/)
@@ -21,7 +21,17 @@ npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
 npx skills add masaner/apex-guard --list
 ```
 
-## Skills
+## Spec-Driven Workflow Skills (`specs/`)
+
+| Skill | Stage & Purpose |
+| :--- | :--- |
+| [apex-guard-propose](./apex-guard-propose/SKILL.md) | **Stage 1 (`Propose`):** Captures user intent into `specs/active/<timestamp>-<slug>/01-proposal.md`, conducts multi-round clarifying Q&A, and auto-transitions to Explore. |
+| [apex-guard-explore](./apex-guard-explore/SKILL.md) | **Stage 2 (`Explore`):** Performs a zero-hallucination audit of relevant codebase & org files, records styling/spacing/newline conventions, builds an ordered checklist in `02-exploration.md`, and auto-transitions to Apply. |
+| [apex-guard-apply](./apex-guard-apply/SKILL.md) | **Stage 3 (`Apply`):** Executes every step in `02-exploration.md` sequentially matching existing code style & conventions, writes evidence in `03-apply.md`, and auto-transitions to Verify. |
+| [apex-guard-verify](./apex-guard-verify/SKILL.md) | **Stage 4 (`Verify`):** Cross-checks every Proposal goal and Explore step against applied code & Apex tests in `04-verification.md`, then invites the user to archive. |
+| [apex-guard-archive](./apex-guard-archive/SKILL.md) | **Stage 5 (`Archive`):** Consolidates `01-`..`04-` into one self-contained `specs/archived/<timestamp>-<slug>.md` file for future AI agents, removes the active session folder, and updates `specs/README.md`. |
+
+## Domain & Platform Skills
 
 | Skill | Purpose |
 | :--- | :--- |
