@@ -13,6 +13,7 @@
 [![Core Coverage](https://img.shields.io/badge/Core%20Coverage-97%25%2B-059669?style=for-the-badge)](#test-coverage)
 [![Governor Limits](https://img.shields.io/badge/SOQL%20%2F%20DML-0%20Queries%20%7C%200%20DML-0284C7?style=for-the-badge)](#architecture)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-6366F1?style=for-the-badge)](#quick-start)
+[![AI Agent Skills](https://img.shields.io/badge/AI%20Agent%20Skills-skills.sh-8B5CF6?style=for-the-badge)](#ai-agent-skills)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](LICENSE)
 
 <br />
@@ -27,6 +28,7 @@
 [Why ApexGuard?](#why-apexguard) •
 [Architecture](#architecture) •
 [Quick Start](#quick-start) •
+[AI Agent Skills](#ai-agent-skills) •
 [Examples by Context](#examples-by-context) •
 [API Reference](#api-reference) •
 [Test Coverage](#test-coverage) •
@@ -208,8 +210,13 @@ Install directly into any org in one click (no CLI setup required):
 Or install via Salesforce CLI (`sf`):
 
 ```bash
-sf package install --package 04td2000000WiM5AAK --wait 10 --target-org my-org
+sf package install --package 04td2000000WiM5AAK --security-type AllUsers --apex-compile package --wait 10 --target-org my-org
 ```
+
+> [!TIP]
+> **Recommended Package Install Screen Selections:**
+> * **Security Level:** Choose **Install for All Users** so non-admin users running **Screen Flows** or **Agentforce Actions** automatically have Apex Class Access to `GuardFlowAction` (`@InvocableMethod`). Least-privilege orgs can choose **Install for Admins Only** (`Guard.*` calls in Apex/Triggers/LWC still work for all users, and admins can grant `GuardFlowAction` via a Permission Set).
+> * **Advanced Options → Apex Compile:** Choose **Compile only the Apex in the package** so installation completes in seconds without recompiling unrelated org Apex.
 
 ### Option 2: Deploy Source via Salesforce CLI (`sf`)
 
@@ -230,7 +237,71 @@ sf apex run test \
   --target-org my-org
 ```
 
+<details>
+<summary><strong>30-Second Execute Anonymous Smoke Test (0 SOQL | 0 DML)</strong></summary>
+
+Paste this script into **Developer Console → Debug → Open Execute Anonymous Window** right after installing:
+
+```apex
+// 1. Happy Path: Pass-through validation & opt-in schema check
+String company = Guard.isNotBlank('Acme Corp', 'company');
+Decimal discount = Guard.isInRange(15.5, 0, 50, 'discount');
+Id sampleAccId = Guard.isIdOfType(
+    Guard.isValidId('001000000000000AAA', 'sampleAccId'),
+    Account.SObjectType,
+    'sampleAccId'
+);
+Guard.isAccessible(Account.SObjectType);
+Guard.isFieldAccessible(Account.Name);
+System.debug('1. Happy path passed: ' + company + ' | discount=' + discount + ' | id=' + sampleAccId);
+
+// 2. Fail-Fast GuardException + Structured JSON Metadata (Quiddity = ANONYMOUS)
+try {
+    Guard.isGreaterThan(-10, 0, 'orderTotal');
+} catch (GuardException ex) {
+    System.debug('2. Caught GuardException: ' + JSON.serializePretty(ex.toMap()));
+}
+
+// 3. Non-Throwing Trigger / Record Validation (Guard.onRecord)
+Account invalidAcc = new Account(Name = '   ', NumberOfEmployees = -5);
+GuardRecord recCheck = Guard.onRecord(invalidAcc)
+    .isNotBlank(Account.Name)
+    .isGreaterThan(Account.NumberOfEmployees, 0);
+System.debug('3. GuardRecord hasErrors=' + recCheck.hasErrors() + ' | errors=' + recCheck.getErrorMessages());
+
+// 4. LWC Mode (AuraHandledException with setMessage() populated)
+try {
+    Guard.forLwc().isNotBlank('', 'searchKey');
+} catch (AuraHandledException auraEx) {
+    System.debug('4. Caught AuraHandledException message: ' + auraEx.getMessage());
+}
+```
+
+</details>
+
 > **2GP Unlocked Package (`0Hod2000000768jCAA`):** Configured in [sfdx-project.json](sfdx-project.json) (`ApexGuard@1.0.0-1` -> `04td2000000WiM5AAK`, `sourceApiVersion: 62.0`, 94% package code coverage validated).
+
+---
+
+## AI Agent Skills
+
+ApexGuard ships a full [Agent Skills](https://www.skills.sh/docs) catalog ([`skills/`](skills/README.md)) so AI coding agents (Antigravity, Claude Code, Cursor, GitHub Copilot, Codex, and others) can install, adopt, test, and extend ApexGuard using verified public APIs and Salesforce best practices:
+
+```bash
+npx skills add masaner/apex-guard
+```
+
+| Category | Skill | Coverage |
+| :--- | :--- | :--- |
+| **Setup** | [`apex-guard-install`](skills/apex-guard-install/SKILL.md) | 2GP Unlocked Package (`04td2000000WiM5AAK`), SFDX deploy, install options, `ApexTestSuite`, smoke test |
+| **Usage** | [`apex-guard-usage`](skills/apex-guard-usage/SKILL.md) | Positive-assertion pass-throughs, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST/Async `toMap()` |
+| **Usage** | [`apex-guard-triggers-and-bulk-dml`](skills/apex-guard-triggers-and-bulk-dml/SKILL.md) | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()` |
+| **Usage** | [`apex-guard-flows-and-agentforce`](skills/apex-guard-flows-and-agentforce/SKILL.md) | `GuardFlowAction` `@InvocableMethod`, all 18 rules, Fault paths vs. Decision routing (`throwOnFailure = false`) |
+| **Usage** | [`apex-guard-testing`](skills/apex-guard-testing/SKILL.md) | Unit testing `GuardException`, `Guard.forLwc()` / `testQuiddityOverride`, DML-free `GuardRecord`, locale-safe `System.runAs` |
+| **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns |
+| **Extending** | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md) | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants |
+
+See [`skills/README.md`](skills/README.md) and [`skills.sh.json`](skills.sh.json) for catalog details and Supported API Surface rules.
 
 ---
 
@@ -616,6 +687,7 @@ Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 te
 
 | Guide | Topics Covered |
 | :--- | :--- |
+| [AI Agent Skills Catalog](skills/README.md) | `npx skills add masaner/apex-guard` — 7 specialized [skills.sh](https://skills.sh) guides covering install, usage, triggers, Flows, Nebula Logger, testing, and security |
 | [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod) |
 | [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
 | [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |

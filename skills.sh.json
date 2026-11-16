@@ -1,0 +1,31 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "Setup",
+      "description": "Installation, package selection, and post-install verification of ApexGuard in a Salesforce org.",
+      "skills": ["apex-guard-install"]
+    },
+    {
+      "title": "Usage",
+      "description": "Writing fail-fast guard clauses across Apex Services, LWC, Triggers, Flows, Agentforce, REST, and Async Apex, and testing code that uses ApexGuard.",
+      "skills": [
+        "apex-guard-usage",
+        "apex-guard-triggers-and-bulk-dml",
+        "apex-guard-flows-and-agentforce",
+        "apex-guard-testing"
+      ]
+    },
+    {
+      "title": "Governance & Security",
+      "description": "Opt-in running-user CRUD/FLS guards, SObject.isSet() safety, governor limits, and team-wide defensive coding standards.",
+      "skills": ["apex-guard-security-and-best-practices"]
+    },
+    {
+      "title": "Extending & Observability",
+      "description": "Integrating ApexGuard with Nebula Logger, custom domain exceptions, and global failure handlers via IGuardFailureHandler.",
+      "skills": ["apex-guard-extensibility-and-logging"]
+    }
+  ]
+}

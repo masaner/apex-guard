@@ -5,8 +5,8 @@
   "description": "Zero-dependency, fail-fast Apex Guard Clause library inspired by .NET CommunityToolkit.Diagnostics.Guard.",
   "scripts": {
     "lint": "eslint force-app",
-    "prettier": "prettier --write \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"config/*.json\"",
-    "prettier:verify": "prettier --check \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"config/*.json\"",
+    "prettier": "prettier --write \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"skills.sh.json\" \"config/*.json\"",
+    "prettier:verify": "prettier --check \"force-app/**/*.{cls,trigger}\" \"sfdx-project.json\" \"package.json\" \"skills.sh.json\" \"config/*.json\"",
     "test:apex": "sf apex run test --suite-names ApexGuard --code-coverage --result-format human --wait 10"
   },
   "devDependencies": {

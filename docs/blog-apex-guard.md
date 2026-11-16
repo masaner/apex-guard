@@ -353,11 +353,14 @@ Phase 1 delivers the core zero-dependency SFDX library, context routing, schema 
 * **1-Click Install (Production / Developer Edition):** [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 * **1-Click Install (Sandbox / Scratch Org):** [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 
-Or install / deploy via Salesforce CLI (`sf`):
+Or install / deploy / equip your AI coding agents via CLI:
 
 ```bash
 # Install Released Unlocked Package v1.0.0-1
-sf package install --package 04td2000000WiM5AAK --wait 10 --target-org my-org
+sf package install --package 04td2000000WiM5AAK --security-type AllUsers --apex-compile package --wait 10 --target-org my-org
+
+# Add ApexGuard AI Agent Skills (Antigravity, Claude Code, Cursor, Copilot, Codex)
+npx skills add masaner/apex-guard
 
 # Or clone and deploy from source
 git clone https://github.com/masaner/apex-guard.git
@@ -368,5 +371,6 @@ sf apex run test --suite-names ApexGuard --code-coverage --result-format human -
 
 If you care about clean, readable, governor-safe Salesforce architecture:
 * **Star & watch the repository** on GitHub: [github.com/masaner/apex-guard](https://github.com/masaner/apex-guard)
+* **Equip your AI coding agent** using [`skills/README.md`](../skills/README.md) (`npx skills add masaner/apex-guard`)
 * **Deploy it to a scratch org** and run the `ApexGuard` test suite
 * **Contribute a validator or adapter**—start with [`CONTRIBUTING.md`](../CONTRIBUTING.md) and [`ROADMAP.md`](../ROADMAP.md) to pick up a Phase 2 domain validator (such as `GuardDateValidator`) or logging recipe!
