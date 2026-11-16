@@ -2,12 +2,12 @@
 
 [![skills.sh](https://skills.sh/b/masaner/apex-guard)](https://www.skills.sh/masaner/apex-guard)
 
-`ApexGuard` publishes **12 official [skills.sh](https://www.skills.sh/docs) agent skills** so **Antigravity** ([skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)), Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other compatible AI coding agents automatically apply ApexGuard's 5-stage Spec-Driven Workflow (`Propose → Explore → Apply → Verify → Archive`), public APIs, Salesforce execution-context patterns, security guarantees, and test helpers.
+`ApexGuard` publishes **7 official [skills.sh](https://www.skills.sh/docs) agent skills** so **Antigravity** ([skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)), Claude Code, Cursor, GitHub Copilot, Codex, Gemini CLI, and other compatible AI coding agents automatically apply ApexGuard's public APIs, Salesforce execution-context patterns, security guarantees, and test helpers.
 
 * **Quick How-To Guide:** [`docs/how-to-use-skills.md`](how-to-use-skills.md)
 * **Live skills.sh Catalog:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
 * **Antigravity Platform Directory:** [skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)
-* **Specs Workspace:** [`specs/README.md`](../specs/README.md) (`specs/active/` & `specs/archived/`)
+* **Companion Spec Workflow Repo:** [github.com/masaner/meric-spec](https://github.com/masaner/meric-spec) (`npx skills add masaner/meric-spec`)
 * **Catalog Configuration:** [`skills.sh.json`](../skills.sh.json)
 * **Skill Sources:** [`skills/`](../skills/README.md)
 
@@ -15,7 +15,7 @@
 
 ## Quick Install for Antigravity & Other Agents
 
-Run from your Salesforce DX repository root to install all 12 skills at **project scope** (`./.agents/skills/apex-guard-*`), or pass `-g` to install them **globally** (`~/.agents/skills/apex-guard-*`) across every Antigravity workspace:
+Run from your Salesforce DX repository root to install all 7 skills at **project scope** (`./.agents/skills/apex-guard-*`), or pass `-g` to install them **globally** (`~/.agents/skills/apex-guard-*`) across every Antigravity workspace:
 
 ```bash
 # Project-scoped install (recommended for teams; writes ./.agents/skills/ & skills-lock.json)
@@ -53,11 +53,6 @@ After running `npx skills add masaner/apex-guard`, start a new **Antigravity** s
 
 | Catalog Group | Skill | Focus Area | Example Antigravity Prompt |
 | :--- | :--- | :--- | :--- |
-| **Spec-Driven Workflow** | [`apex-guard-propose`](../skills/apex-guard-propose/SKILL.md) | Stage 1: User intent, timestamped `specs/active/<session>/01-proposal.md`, multi-round Q&A, auto-handoff | *"Use `apex-guard-propose` to refactor `OrderService` and `OrderTrigger` to ApexGuard."* |
-| **Spec-Driven Workflow** | [`apex-guard-explore`](../skills/apex-guard-explore/SKILL.md) | Stage 2: Zero-hallucination codebase/org audit, spacing/newline/style fingerprint, ordered `02-exploration.md` checklist | *(`continue` after Proposal Q&A — or invoke directly to explore & audit conventions)* |
-| **Spec-Driven Workflow** | [`apex-guard-apply`](../skills/apex-guard-apply/SKILL.md) | Stage 3: Executes `02-exploration.md` checklist sequentially preserving codebase style; logs `03-apply.md` | *(`continue` after Exploration confirmation)* |
-| **Spec-Driven Workflow** | [`apex-guard-verify`](../skills/apex-guard-verify/SKILL.md) | Stage 4: Traceability matrix + Prettier/Apex test verification in `04-verification.md` | *(`continue` automatically after Apply completes)* |
-| **Spec-Driven Workflow** | [`apex-guard-archive`](../skills/apex-guard-archive/SKILL.md) | Stage 5: Consolidates `01-`..`04-` into `specs/archived/<session>.md`, cleans `specs/active/`, updates `specs/README.md` | *(`archive` after Verify passes)* |
 | **Setup** | [`apex-guard-install`](../skills/apex-guard-install/SKILL.md) | 2GP Unlocked Package (`04td2000000WiM5AAK`), SFDX deploy, install options, `ApexTestSuite`, smoke test | *"Install ApexGuard (`04td2000000WiM5AAK`) into my scratch org and run the Execute Anonymous smoke test."* |
 | **Usage** | [`apex-guard-usage`](../skills/apex-guard-usage/SKILL.md) | Pass-through `Guard.*` assertions, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST `toMap()` | *"Refactor this deeply nested Apex service method and `@AuraEnabled` controller to use flat `Guard` clauses."* |
 | **Usage** | [`apex-guard-triggers-and-bulk-dml`](../skills/apex-guard-triggers-and-bulk-dml/SKILL.md) | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()` | *"Rewrite this `Opportunity` trigger validation loop with `Guard.onRecord()` so partial DML still saves valid rows."* |
@@ -70,7 +65,7 @@ After running `npx skills add masaner/apex-guard`, start a new **Antigravity** s
 
 ## How `skills.sh.json` Organizes the Catalog Page
 
-The repository root [`skills.sh.json`](../skills.sh.json) configures how [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard) groups all 12 skills (`Setup`, `Spec-Driven Workflow`, `Usage`, `Governance & Security`, `Extending & Observability`) using the official `https://skills.sh/schemas/skills.sh.schema.json` schema.
+The repository root [`skills.sh.json`](../skills.sh.json) configures how [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard) groups all 7 skills (`Setup`, `Usage`, `Governance & Security`, `Extending & Observability`) using the official `https://skills.sh/schemas/skills.sh.schema.json` schema.
 
 On every push and pull request to `main`, [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) validates that:
 

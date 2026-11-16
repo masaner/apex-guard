@@ -8,17 +8,6 @@
       "skills": ["apex-guard-install"]
     },
     {
-      "title": "Spec-Driven Workflow",
-      "description": "End-to-end 5-stage AI workflow (Propose -> Explore -> Apply -> Verify -> Archive) using specs/active/ and specs/archived/.",
-      "skills": [
-        "apex-guard-propose",
-        "apex-guard-explore",
-        "apex-guard-apply",
-        "apex-guard-verify",
-        "apex-guard-archive"
-      ]
-    },
-    {
       "title": "Usage",
       "description": "Writing fail-fast guard clauses across Apex Services, LWC, Triggers, Flows, Agentforce, REST, and Async Apex, and testing code that uses ApexGuard.",
       "skills": [
