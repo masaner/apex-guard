@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install devDependencies
         run: npm install --no-audit --no-fund
@@ -124,12 +124,12 @@ jobs:
       - name: Setup Node.js for Salesforce CLI
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Salesforce CLI & Code Analyzer
         run: |
           npm install -g @salesforce/cli
-          sf plugins install @salesforce/plugin-code-analyzer
+          sf code-analyzer --help >/dev/null 2>&1 || sf plugins install @salesforce/plugin-code-analyzer
 
       - name: Run Salesforce Code Analyzer
         run: sf code-analyzer run --workspace force-app --severity-threshold 2
