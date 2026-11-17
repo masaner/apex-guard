@@ -358,7 +358,8 @@ public inherited sharing class GuardFlowAction {
         }
         try {
             List<Schema.DescribeSObjectResult> described = Schema.describeSObjects(
-                new List<String>{ apiName.trim() }
+                new List<String>{ apiName.trim() },
+                SObjectDescribeOptions.DEFERRED
             );
             return described.isEmpty() ? null : described[0].getSObjectType();
         } catch (Exception ex) {

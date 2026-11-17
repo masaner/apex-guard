@@ -115,6 +115,25 @@ jobs:
           done < <(find force-app -type f -name '*.cls')
           exit "$missing"
 
+      - name: Setup Java 21 for Salesforce Code Analyzer
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Node.js for Salesforce CLI
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Salesforce CLI & Code Analyzer
+        run: |
+          npm install -g @salesforce/cli
+          sf plugins install @salesforce/plugin-code-analyzer
+
+      - name: Run Salesforce Code Analyzer
+        run: sf code-analyzer run --workspace force-app --severity-threshold 2
+
       - name: Deploy & run Apex tests in target org (optional)
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
@@ -123,7 +142,6 @@ jobs:
             echo "Skipping org deploy and Apex tests: SFDX_AUTH_URL secret is not configured."
             exit 0
           fi
-          npm install -g @salesforce/cli
           printf '%s' "$SFDX_AUTH_URL" > sfdx-auth.txt
           sf org login sfdx-url --sfdx-url-file sfdx-auth.txt --alias ci-org --set-default
           rm -f sfdx-auth.txt

@@ -383,7 +383,7 @@ public inherited sharing class GuardSchemaValidator {
         if (sObjectType == null || testForceDenyCrud) {
             return false;
         }
-        return sObjectType.getDescribe().isAccessible();
+        return sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).isAccessible();
     }
 
     /**
@@ -395,7 +395,7 @@ public inherited sharing class GuardSchemaValidator {
         if (sObjectType == null || testForceDenyCrud) {
             return false;
         }
-        return sObjectType.getDescribe().isCreateable();
+        return sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).isCreateable();
     }
 
     /**
@@ -407,7 +407,7 @@ public inherited sharing class GuardSchemaValidator {
         if (sObjectType == null || testForceDenyCrud) {
             return false;
         }
-        return sObjectType.getDescribe().isUpdateable();
+        return sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).isUpdateable();
     }
 
     /**
@@ -419,7 +419,7 @@ public inherited sharing class GuardSchemaValidator {
         if (sObjectType == null || testForceDenyCrud) {
             return false;
         }
-        return sObjectType.getDescribe().isDeletable();
+        return sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).isDeletable();
     }
 
     /**
@@ -472,7 +472,7 @@ public inherited sharing class GuardSchemaValidator {
     ) {
         requireSObjectType(sObjectType);
         if (!hasPermission) {
-            String objectName = sObjectType.getDescribe().getName();
+            String objectName = sObjectType.getDescribe(SObjectDescribeOptions.DEFERRED).getName();
             if (customException != null) {
                 GuardContext.failWithCustomException(
                     customException,

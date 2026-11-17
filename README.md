@@ -18,6 +18,7 @@
 
 <br />
 
+[![Deploy to Salesforce](https://img.shields.io/badge/Deploy%20to%20Salesforce-1--Click%20Deploy-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://githubsfdeploy.herokuapp.com/?owner=masaner&repo=apex-guard&ref=main)
 [![Unlocked Package Installation (Production)](https://img.shields.io/badge/Unlocked%20Package%20Install-Production-0176D3?style=for-the-badge&logo=salesforce&logoColor=white)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 [![Unlocked Package Installation (Sandbox)](https://img.shields.io/badge/Unlocked%20Package%20Install-Sandbox-0284C7?style=for-the-badge&logo=salesforce&logoColor=white)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 [![How to Add & Use AI Agent Skills](https://img.shields.io/badge/How%20To%20Add%20%26%20Use-Agent%20Skills-8B5CF6?style=for-the-badge)](docs/how-to-use-skills.md)
@@ -45,6 +46,8 @@
 Enterprise Apex codebases quickly accumulate defensive `if/else` pyramids (the **"arrow anti-pattern"**), inconsistent exception messages, LWC `"Script-thrown exception"` bugs, and partial-DML trigger crashes.
 
 **ApexGuard**—inspired by Microsoft's `.NET CommunityToolkit.Diagnostics.Guard`—replaces boilerplate defensive branching with a single, positive-assertion `Guard` facade featuring **zero external dependencies**, **zero SOQL/DML**, and **universal runtime awareness**.
+
+https://github.com/masaner/apex-guard/releases/download/v1.0.0/apexguard-v2-master.mp4
 
 <table>
 <tr>
