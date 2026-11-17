@@ -4,9 +4,9 @@
 
 This guide walks you through adding ApexGuard's **7 Salesforce-focused Agent Skills** ([skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)) to your AI coding agent and pairing them with our standalone **[`masaner/meric-spec`](https://github.com/masaner/meric-spec)** repository for Spec-Driven (`Propose → Explore → Apply → Verify → Archive`) execution across any project.
 
-* **ApexGuard Skills Catalog:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
-* **Antigravity Platform Directory:** [skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)
-* **Companion Spec Workflow Framework:** [github.com/masaner/meric-spec](https://github.com/masaner/meric-spec)
+- **ApexGuard Skills Catalog:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
+- **Antigravity Platform Directory:** [skills.sh/agent/antigravity](https://www.skills.sh/agent/antigravity)
+- **Companion Spec Workflow Framework:** [github.com/masaner/meric-spec](https://github.com/masaner/meric-spec)
 
 ---
 
@@ -39,15 +39,15 @@ npx skills add masaner/meric-spec -g --agent antigravity --skill '*' -y
 
 ## Step 2: How to Use Each ApexGuard Skill
 
-| Task | Skill | Example Prompt |
-| :--- | :--- | :--- |
-| Install Released 2GP Package (`04td2000000WiM5AAK`) or deploy source | [`apex-guard-install`](../skills/apex-guard-install/SKILL.md) | *"Install ApexGuard using the Released Unlocked Package and run the Execute Anonymous smoke test."* |
-| Refactor Apex Services, LWC controllers, or REST APIs | [`apex-guard-usage`](../skills/apex-guard-usage/SKILL.md) | *"Refactor this deeply nested service class and `@AuraEnabled` controller to use pass-through `Guard.*` calls and `Guard.forLwc()`."* |
-| Validate records inside Triggers or partial DML (`allOrNone = false`) | [`apex-guard-triggers-and-bulk-dml`](../skills/apex-guard-triggers-and-bulk-dml/SKILL.md) | *"Convert this Opportunity trigger loop to `Guard.onRecord(opp)` so multi-field errors attach cleanly without breaking partial DML."* |
-| Configure Flow or Agentforce validation rules | [`apex-guard-flows-and-agentforce`](../skills/apex-guard-flows-and-agentforce/SKILL.md) | *"Set up `GuardFlowAction` (`Validate Input (ApexGuard)`) for a Screen Flow using `throwOnFailure = false` Decision routing."* |
-| Integrate **Nebula Logger** or custom exceptions | [`apex-guard-extensibility-and-logging`](../skills/apex-guard-extensibility-and-logging/SKILL.md) | *"Wire `IGuardFailureHandler` to Nebula Logger so guard failures publish before transaction rollback."* |
-| Write `@IsTest` & locale-safe `System.runAs` unit tests | [`apex-guard-testing`](../skills/apex-guard-testing/SKILL.md) | *"Add `@IsTest` coverage for LWC `AuraHandledException` messages, `GuardRecord`, and `System.runAs` CRUD/FLS checks."* |
-| Review `inherited sharing`, `isSet()`, & CRUD/FLS policies | [`apex-guard-security-and-best-practices`](../skills/apex-guard-security-and-best-practices/SKILL.md) | *"Audit these controllers and triggers for `record.isSet()` safety and opt-in CRUD/FLS enforcement."* |
+| Task                                                                  | Skill                                                                                                 | Example Prompt                                                                                                                        |
+| :-------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| Install Released 2GP Package (`04td2000000WkULAA0`) or deploy source  | [`apex-guard-install`](../skills/apex-guard-install/SKILL.md)                                         | _"Install ApexGuard using the Released Unlocked Package and run the Execute Anonymous smoke test."_                                   |
+| Refactor Apex Services, LWC controllers, or REST APIs                 | [`apex-guard-usage`](../skills/apex-guard-usage/SKILL.md)                                             | _"Refactor this deeply nested service class and `@AuraEnabled` controller to use pass-through `Guard.*` calls and `Guard.forLwc()`."_ |
+| Validate records inside Triggers or partial DML (`allOrNone = false`) | [`apex-guard-triggers-and-bulk-dml`](../skills/apex-guard-triggers-and-bulk-dml/SKILL.md)             | _"Convert this Opportunity trigger loop to `Guard.onRecord(opp)` so multi-field errors attach cleanly without breaking partial DML."_ |
+| Configure Flow or Agentforce validation rules                         | [`apex-guard-flows-and-agentforce`](../skills/apex-guard-flows-and-agentforce/SKILL.md)               | _"Set up `GuardFlowAction` (`Validate Input (ApexGuard)`) for a Screen Flow using `throwOnFailure = false` Decision routing."_        |
+| Integrate **Nebula Logger** or custom exceptions                      | [`apex-guard-extensibility-and-logging`](../skills/apex-guard-extensibility-and-logging/SKILL.md)     | _"Wire `IGuardFailureHandler` to Nebula Logger so guard failures publish before transaction rollback."_                               |
+| Write `@IsTest` & locale-safe `System.runAs` unit tests               | [`apex-guard-testing`](../skills/apex-guard-testing/SKILL.md)                                         | _"Add `@IsTest` coverage for LWC `AuraHandledException` messages, `GuardRecord`, and `System.runAs` CRUD/FLS checks."_                |
+| Review `inherited sharing`, `isSet()`, & CRUD/FLS policies            | [`apex-guard-security-and-best-practices`](../skills/apex-guard-security-and-best-practices/SKILL.md) | _"Audit these controllers and triggers for `record.isSet()` safety and opt-in CRUD/FLS enforcement."_                                 |
 
 ---
 

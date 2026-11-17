@@ -54,11 +54,11 @@ private class GuardFlowActionTest {
             }
         );
 
-        System.Assert.areEqual(6, results.size());
+        Assert.areEqual(6, results.size());
         for (GuardFlowAction.Result res : results) {
-            System.Assert.isTrue(res.isValid, 'Expected valid result for ' + res.paramName);
-            System.Assert.isNull(res.errorMessage);
-            System.Assert.isNull(res.errorCode);
+            Assert.isTrue(res.isValid, 'Expected valid result for ' + res.paramName);
+            Assert.isNull(res.errorMessage);
+            Assert.isNull(res.errorCode);
         }
     }
 
@@ -73,10 +73,10 @@ private class GuardFlowActionTest {
 
         try {
             GuardFlowAction.validate(new List<GuardFlowAction.Request>{ failingReq });
-            System.Assert.fail('Expected GuardException when throwOnFailure defaults to true.');
+            Assert.fail('Expected GuardException when throwOnFailure defaults to true.');
         } catch (GuardException ex) {
-            System.Assert.areEqual(GuardException.ERR_GREATER_THAN, ex.getErrorCode());
-            System.Assert.areEqual('opportunityAmount', ex.getParamName());
+            Assert.areEqual(GuardException.ERR_GREATER_THAN, ex.getErrorCode());
+            Assert.areEqual('opportunityAmount', ex.getParamName());
         }
     }
 
@@ -123,33 +123,30 @@ private class GuardFlowActionTest {
             }
         );
 
-        System.Assert.areEqual(5, results.size());
+        Assert.areEqual(5, results.size());
 
-        System.Assert.isTrue(results[0].isValid);
+        Assert.isTrue(results[0].isValid);
 
-        System.Assert.isFalse(results[1].isValid);
-        System.Assert.areEqual(GuardException.ERR_BLANK_STRING, results[1].errorCode);
-        System.Assert.areEqual('caseSubject', results[1].paramName);
-        System.Assert.isTrue(results[1].errorMessage.contains('caseSubject'));
+        Assert.isFalse(results[1].isValid);
+        Assert.areEqual(GuardException.ERR_BLANK_STRING, results[1].errorCode);
+        Assert.areEqual('caseSubject', results[1].paramName);
+        Assert.isTrue(results[1].errorMessage.contains('caseSubject'));
 
-        System.Assert.isFalse(results[2].isValid);
-        System.Assert.areEqual(GuardException.ERR_MAX_LENGTH, results[2].errorCode);
+        Assert.isFalse(results[2].isValid);
+        Assert.areEqual(GuardException.ERR_MAX_LENGTH, results[2].errorCode);
 
-        System.Assert.isFalse(results[3].isValid);
-        System.Assert.areEqual(GuardException.ERR_ZERO_VALUE, results[3].errorCode);
-        System.Assert.areEqual('Quantity cannot be zero in Flow.', results[3].errorMessage);
+        Assert.isFalse(results[3].isValid);
+        Assert.areEqual(GuardException.ERR_ZERO_VALUE, results[3].errorCode);
+        Assert.areEqual('Quantity cannot be zero in Flow.', results[3].errorMessage);
 
-        System.Assert.isFalse(results[4].isValid);
-        System.Assert.areEqual(GuardException.ERR_INVALID_GUARD_ARGUMENT, results[4].errorCode);
+        Assert.isFalse(results[4].isValid);
+        Assert.areEqual(GuardException.ERR_INVALID_GUARD_ARGUMENT, results[4].errorCode);
     }
 
     @IsTest
     private static void testEmptyAndNullRequestLists() {
-        System.Assert.areEqual(0, GuardFlowAction.validate(null).size());
-        System.Assert.areEqual(
-            0,
-            GuardFlowAction.validate(new List<GuardFlowAction.Request>()).size()
-        );
+        Assert.areEqual(0, GuardFlowAction.validate(null).size());
+        Assert.areEqual(0, GuardFlowAction.validate(new List<GuardFlowAction.Request>()).size());
     }
 
     @IsTest
@@ -208,9 +205,9 @@ private class GuardFlowActionTest {
         reqs.add(lteReq);
 
         List<GuardFlowAction.Result> results = GuardFlowAction.validate(reqs);
-        System.Assert.areEqual(8, results.size());
+        Assert.areEqual(8, results.size());
         for (GuardFlowAction.Result res : results) {
-            System.Assert.isTrue(res.isValid, 'Expected valid for ' + res.paramName);
+            Assert.isTrue(res.isValid, 'Expected valid for ' + res.paramName);
         }
     }
 }

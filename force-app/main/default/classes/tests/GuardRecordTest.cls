@@ -22,11 +22,11 @@ private class GuardRecordTest {
             .isInRange(Account.NumberOfEmployees, 1, 10000)
             .matchesRegex(Account.TickerSymbol, '^[A-Z]{2,5}$');
 
-        System.Assert.isTrue(validator.isValid());
-        System.Assert.isFalse(validator.hasErrors());
-        System.Assert.isFalse(acc.hasErrors());
-        System.Assert.areEqual(0, validator.getErrorMessages().size());
-        System.Assert.areEqual(acc, validator.getRecord());
+        Assert.isTrue(validator.isValid());
+        Assert.isFalse(validator.hasErrors());
+        Assert.isFalse(acc.hasErrors());
+        Assert.areEqual(0, validator.getErrorMessages().size());
+        Assert.areEqual(acc, validator.getRecord());
     }
 
     @IsTest
@@ -48,17 +48,17 @@ private class GuardRecordTest {
             .hasPopulatedField(Account.Industry)
             .isTrue(false, 'Cross-field business rule failed.');
 
-        System.Assert.isFalse(validator.isValid());
-        System.Assert.isTrue(validator.hasErrors());
-        System.Assert.isTrue(acc.hasErrors());
+        Assert.isFalse(validator.isValid());
+        Assert.isTrue(validator.hasErrors());
+        Assert.isTrue(acc.hasErrors());
 
         List<String> recordedMessages = validator.getErrorMessages();
-        System.Assert.areEqual(7, recordedMessages.size());
-        System.Assert.areEqual('Account Name is required.', recordedMessages[0]);
-        System.Assert.areEqual('Cross-field business rule failed.', recordedMessages[6]);
+        Assert.areEqual(7, recordedMessages.size());
+        Assert.areEqual('Account Name is required.', recordedMessages[0]);
+        Assert.areEqual('Cross-field business rule failed.', recordedMessages[6]);
 
         List<Database.Error> dbErrors = acc.getErrors();
-        System.Assert.areEqual(7, dbErrors.size());
+        Assert.areEqual(7, dbErrors.size());
         Map<String, String> messageByField = new Map<String, String>();
         Set<String> recordLevelMessages = new Set<String>();
         for (Database.Error err : dbErrors) {
@@ -72,13 +72,13 @@ private class GuardRecordTest {
             }
         }
 
-        System.Assert.isTrue(recordLevelMessages.contains('Cross-field business rule failed.'));
-        System.Assert.areEqual('Account Name is required.', messageByField.get('Name'));
-        System.Assert.isTrue(messageByField.containsKey('AnnualRevenue'));
-        System.Assert.isTrue(messageByField.containsKey('NumberOfEmployees'));
-        System.Assert.isTrue(messageByField.containsKey('TickerSymbol'));
-        System.Assert.isTrue(messageByField.containsKey('AccountNumber'));
-        System.Assert.isTrue(messageByField.containsKey('Industry'));
+        Assert.isTrue(recordLevelMessages.contains('Cross-field business rule failed.'));
+        Assert.areEqual('Account Name is required.', messageByField.get('Name'));
+        Assert.isTrue(messageByField.containsKey('AnnualRevenue'));
+        Assert.isTrue(messageByField.containsKey('NumberOfEmployees'));
+        Assert.isTrue(messageByField.containsKey('TickerSymbol'));
+        Assert.isTrue(messageByField.containsKey('AccountNumber'));
+        Assert.isTrue(messageByField.containsKey('Industry'));
     }
 
     @IsTest
@@ -88,18 +88,18 @@ private class GuardRecordTest {
             .isNotNull(Account.Name)
             .isLessThan(Account.AnnualRevenue, 1000);
 
-        System.Assert.isTrue(validator.hasErrors());
-        System.Assert.areEqual(2, sparseAcc.getErrors().size());
+        Assert.isTrue(validator.hasErrors());
+        Assert.areEqual(2, sparseAcc.getErrors().size());
     }
 
     @IsTest
     private static void testNullRecordThrowsGuardException() {
         try {
             Guard.onRecord(null);
-            System.Assert.fail('Expected GuardException for null record.');
+            Assert.fail('Expected GuardException for null record.');
         } catch (GuardException ex) {
-            System.Assert.areEqual(GuardException.ERR_NULL_VALUE, ex.getErrorCode());
-            System.Assert.areEqual('record', ex.getParamName());
+            Assert.areEqual(GuardException.ERR_NULL_VALUE, ex.getErrorCode());
+            Assert.areEqual('record', ex.getParamName());
         }
     }
 
@@ -134,7 +134,7 @@ private class GuardRecordTest {
             .isLessThanOrEqualTo(2, 2, 'num')
             .isInRange(5, 1, 10, 'num')
             .isNotZero(1, 'num');
-        System.Assert.isTrue(passing.isValid());
+        Assert.isTrue(passing.isValid());
 
         Account failingAcc = new Account(
             Name = 'Bad',
@@ -166,8 +166,8 @@ private class GuardRecordTest {
             .isInRange(99, 1, 10, 'param')
             .isNotZero(0, 'param');
 
-        System.Assert.isTrue(failing.hasErrors());
-        System.Assert.areEqual(23, failing.getErrorMessages().size());
+        Assert.isTrue(failing.hasErrors());
+        Assert.areEqual(23, failing.getErrorMessages().size());
     }
 
     @IsTest
@@ -179,8 +179,8 @@ private class GuardRecordTest {
             Account defaultModeAcc = new Account(Name = '   ');
             GuardRecord defaultValidator = Guard.onRecord(defaultModeAcc)
                 .isNotBlank(Account.Name, 'Name required in trigger system context.');
-            System.Assert.isTrue(defaultValidator.hasErrors());
-            System.Assert.areEqual(1, defaultModeAcc.getErrors().size());
+            Assert.isTrue(defaultValidator.hasErrors());
+            Assert.areEqual(1, defaultModeAcc.getErrors().size());
 
             // 2. Opt-in skipInaccessible() skips FLS-inaccessible fields silently
             Account skippedAcc = new Account(
@@ -211,16 +211,16 @@ private class GuardRecordTest {
                 .hasPopulatedField(Account.Industry)
                 .isTrue(false, 'Record-level assertion still executes.');
 
-            System.Assert.isTrue(flsAwareValidator.hasErrors());
-            System.Assert.areEqual(1, flsAwareValidator.getErrorMessages().size());
-            System.Assert.areEqual(
+            Assert.isTrue(flsAwareValidator.hasErrors());
+            Assert.areEqual(1, flsAwareValidator.getErrorMessages().size());
+            Assert.areEqual(
                 'Record-level assertion still executes.',
                 flsAwareValidator.getErrorMessages()[0]
             );
 
             // Re-disabling skipInaccessible resumes validation
             flsAwareValidator.skipInaccessible(false).isNotBlank(Account.Name);
-            System.Assert.areEqual(2, flsAwareValidator.getErrorMessages().size());
+            Assert.areEqual(2, flsAwareValidator.getErrorMessages().size());
 
             // 3. Explicit opt-in FLS checks attach field errors cleanly
             Guard.resetContext();
@@ -232,9 +232,9 @@ private class GuardRecordTest {
                 .isFieldCreateable(Account.CreatedDate)
                 .isFieldUpdateable(Account.CreatedDate, 'Custom CreatedDate read-only message.');
 
-            System.Assert.isTrue(explicitFls.hasErrors());
-            System.Assert.areEqual(2, explicitFls.getErrorMessages().size());
-            System.Assert.areEqual(
+            Assert.isTrue(explicitFls.hasErrors());
+            Assert.areEqual(2, explicitFls.getErrorMessages().size());
+            Assert.areEqual(
                 'Custom CreatedDate read-only message.',
                 explicitFls.getErrorMessages()[1]
             );
@@ -244,8 +244,8 @@ private class GuardRecordTest {
             GuardRecord deniedFls = Guard.onRecord(deniedAcc)
                 .isFieldAccessible(Account.Name)
                 .isFieldUpdateable(Account.Name);
-            System.Assert.isTrue(deniedFls.hasErrors());
-            System.Assert.areEqual(2, deniedFls.getErrorMessages().size());
+            Assert.isTrue(deniedFls.hasErrors());
+            Assert.areEqual(2, deniedFls.getErrorMessages().size());
         } finally {
             Guard.resetContext();
         }

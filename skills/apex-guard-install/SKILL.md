@@ -17,23 +17,23 @@ Enterprise Salesforce orgs mix synchronous Services, Triggers, `@AuraEnabled` LW
 
 Choose between the **Released 2GP Unlocked Package** (fastest for most orgs) or **SFDX Source Deployment** (best if your team maintains monorepo source customization).
 
-### Option A: Released 2GP Unlocked Package (`ApexGuard@1.0.0-1`, Recommended)
+### Option A: Released 2GP Unlocked Package (`ApexGuard@1.0.1-1`, Recommended)
 
 - **Package ID (`Package2Id`):** `0Hod2000000768jCAA`
-- **Subscriber Package Version ID:** `04td2000000WiM5AAK` (`Version 1.0.0.1`, Promoted/Released, `94%` package code coverage validated)
+- **Subscriber Package Version ID:** `04td2000000WkULAA0` (`Version 1.0.1.1`, Promoted/Released, `94%` package code coverage validated)
 - **Namespace:** None (un-namespaced; all classes are called directly as `Guard.*`)
 - **Salesforce API Version:** `62.0`
 
 **1-Click Browser Install Links:**
 
-- **Production / Developer Edition:** `https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK`
-- **Sandbox / Scratch Org:** `https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK`
+- **Production / Developer Edition:** `https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0`
+- **Sandbox / Scratch Org:** `https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0`
 
 **Salesforce CLI (`sf`):**
 
 ```bash
 sf package install \
-  --package 04td2000000WiM5AAK \
+  --package 04td2000000WkULAA0 \
   --security-type AllUsers \
   --apex-compile package \
   --wait 10 \
@@ -83,7 +83,7 @@ sf apex run test \
   --target-org my-org
 ```
 
-Expect all **25/25 unit tests** to pass (`100%` pass rate).
+Expect all **26/26 unit tests** to pass (`100%` pass rate).
 
 ---
 
@@ -133,7 +133,7 @@ System.debug('4. Flow Action isValid=' + flowRes.isValid + ' | code=' + flowRes.
 ## Post-Install Troubleshooting
 
 - **`You do not have access to the Apex class named 'GuardFlowAction'` in a Screen Flow or Agentforce action:** The package was installed for Admins Only and the running user lacks Apex Class Access to `GuardFlowAction`. Grant access via the user's Profile or a Permission Set.
-- **Installing into a Production org fails saying package version is Beta:** Ensure you are using the promoted/released Subscriber Package Version ID `04td2000000WiM5AAK` (not an unpromoted build ID).
+- **Installing into a Production org fails saying package version is Beta:** Ensure you are using the promoted/released Subscriber Package Version ID `04td2000000WkULAA0` (not an unpromoted build ID).
 
 ## Related Skills
 

@@ -4,8 +4,8 @@
       "path": "force-app",
       "default": true,
       "package": "ApexGuard",
-      "versionName": "ver 1.0",
-      "versionNumber": "1.0.0.NEXT",
+      "versionName": "ver 1.0.1",
+      "versionNumber": "1.0.1.NEXT",
       "versionDescription": "Zero-dependency Apex Guard Clause library with universal execution-context support."
     }
   ],
@@ -15,6 +15,7 @@
   "sourceApiVersion": "62.0",
   "packageAliases": {
     "ApexGuard": "0Hod2000000768jCAA",
-    "ApexGuard@1.0.0-1": "04td2000000WiM5AAK"
+    "ApexGuard@1.0.0-1": "04td2000000WiM5AAK",
+    "ApexGuard@1.0.1-1": "04td2000000WkULAA0"
   }
 }

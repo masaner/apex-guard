@@ -9,7 +9,7 @@
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/masaner/apex-guard/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/masaner/apex-guard/actions/workflows/ci.yml)
 [![Salesforce API](https://img.shields.io/badge/Salesforce%20API-v62.0-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://developer.salesforce.com/docs)
-[![Apex Tests](https://img.shields.io/badge/Tests-25%2F25%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
+[![Apex Tests](https://img.shields.io/badge/Tests-26%2F26%20Passing-10B981?style=for-the-badge&logo=checkmarx&logoColor=white)](#test-coverage)
 [![Core Coverage](https://img.shields.io/badge/Core%20Coverage-97%25%2B-059669?style=for-the-badge)](#test-coverage)
 [![Governor Limits](https://img.shields.io/badge/SOQL%20%2F%20DML-0%20Queries%20%7C%200%20DML-0284C7?style=for-the-badge)](#architecture)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-6366F1?style=for-the-badge)](#quick-start)
@@ -19,8 +19,8 @@
 <br />
 
 [![Deploy to Salesforce](https://img.shields.io/badge/Deploy%20to%20Salesforce-1--Click%20Deploy-00A1E0?style=for-the-badge&logo=salesforce&logoColor=white)](https://githubsfdeploy.herokuapp.com/?owner=masaner&repo=apex-guard&ref=main)
-[![Unlocked Package Installation (Production)](https://img.shields.io/badge/Unlocked%20Package%20Install-Production-0176D3?style=for-the-badge&logo=salesforce&logoColor=white)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
-[![Unlocked Package Installation (Sandbox)](https://img.shields.io/badge/Unlocked%20Package%20Install-Sandbox-0284C7?style=for-the-badge&logo=salesforce&logoColor=white)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+[![Unlocked Package Installation (Production)](https://img.shields.io/badge/Unlocked%20Package%20Install-Production-0176D3?style=for-the-badge&logo=salesforce&logoColor=white)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0)
+[![Unlocked Package Installation (Sandbox)](https://img.shields.io/badge/Unlocked%20Package%20Install-Sandbox-0284C7?style=for-the-badge&logo=salesforce&logoColor=white)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0)
 [![How to Add & Use AI Agent Skills](https://img.shields.io/badge/How%20To%20Add%20%26%20Use-Agent%20Skills-8B5CF6?style=for-the-badge)](docs/how-to-use-skills.md)
 
 <br />
@@ -204,17 +204,17 @@ force-app/main/default/
 
 ## Quick Start
 
-### Option 1: Install via Unlocked Package (`v1.0.0-1` — Released)
+### Option 1: Install via Unlocked Package (`v1.0.1-1` — Released)
 
 Install directly into any org in one click (no CLI setup required):
 
-- [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
-- [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+- [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0)
+- [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WkULAA0)
 
 Or install via Salesforce CLI (`sf`):
 
 ```bash
-sf package install --package 04td2000000WiM5AAK --security-type AllUsers --apex-compile package --wait 10 --target-org my-org
+sf package install --package 04td2000000WkULAA0 --security-type AllUsers --apex-compile package --wait 10 --target-org my-org
 ```
 
 > [!TIP]
@@ -288,7 +288,7 @@ System.debug('4. Flow Action isValid=' + flowRes.isValid + ' | code=' + flowRes.
 
 </details>
 
-> **2GP Unlocked Package (`0Hod2000000768jCAA`):** Configured in [sfdx-project.json](sfdx-project.json) (`ApexGuard@1.0.0-1` -> `04td2000000WiM5AAK`, `sourceApiVersion: 62.0`, 94% package code coverage validated).
+> **2GP Unlocked Package (`0Hod2000000768jCAA`):** Configured in [sfdx-project.json](sfdx-project.json) (`ApexGuard@1.0.1-1` -> `04td2000000WkULAA0`, `sourceApiVersion: 62.0`, 94% package code coverage validated).
 
 ---
 
@@ -311,15 +311,15 @@ npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
 npx skills add masaner/apex-guard --list
 ```
 
-| Category       | Skill                                                                                              | Coverage                                                                                                                     |
-| :------------- | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| **Setup**      | [`apex-guard-install`](skills/apex-guard-install/SKILL.md)                                         | 2GP Unlocked Package (`04td2000000WiM5AAK`), SFDX deploy, install options, `ApexTestSuite`, smoke test                       |
-| **Usage**      | [`apex-guard-usage`](skills/apex-guard-usage/SKILL.md)                                             | Positive-assertion pass-throughs, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST/Async `toMap()`        |
-| **Usage**      | [`apex-guard-triggers-and-bulk-dml`](skills/apex-guard-triggers-and-bulk-dml/SKILL.md)             | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()`         |
-| **Usage**      | [`apex-guard-flows-and-agentforce`](skills/apex-guard-flows-and-agentforce/SKILL.md)               | `GuardFlowAction` `@InvocableMethod`, all 18 rules, Fault paths vs. Decision routing (`throwOnFailure = false`)              |
-| **Usage**      | [`apex-guard-testing`](skills/apex-guard-testing/SKILL.md)                                         | Unit testing `GuardException`, `Guard.forLwc()` / `testQuiddityOverride`, DML-free `GuardRecord`, locale-safe `System.runAs` |
-| **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns                   |
-| **Extending**  | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md)     | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants          |
+| Category       | Skill                                                                                              | Coverage                                                                                                                      |
+| :------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| **Setup**      | [`apex-guard-install`](skills/apex-guard-install/SKILL.md)                                         | 2GP Unlocked Package (`04td2000000WkULAA0`), SFDX deploy, install options, `ApexTestSuite`, smoke test                        |
+| **Usage**      | [`apex-guard-usage`](skills/apex-guard-usage/SKILL.md)                                             | Positive-assertion pass-throughs, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST/Async `toMap()`         |
+| **Usage**      | [`apex-guard-triggers-and-bulk-dml`](skills/apex-guard-triggers-and-bulk-dml/SKILL.md)             | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()`          |
+| **Usage**      | [`apex-guard-flows-and-agentforce`](skills/apex-guard-flows-and-agentforce/SKILL.md)               | `GuardFlowAction` `@InvocableMethod`, all 18 rules, Fault paths vs. Decision routing (`throwOnFailure = false`)               |
+| **Usage**      | [`apex-guard-testing`](skills/apex-guard-testing/SKILL.md)                                         | Modern `Assert.*`, Stub API (`Test.createStub`) / Apex Mockery, `Guard.forLwc()`, DML-free `GuardRecord`, locale-safe `runAs` |
+| **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns                    |
+| **Extending**  | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md)     | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants           |
 
 - **Quick How-To Guide:** [How to Add & Use AI Agent Skills (`docs/how-to-use-skills.md`)](docs/how-to-use-skills.md)
 - **Live skills.sh Page:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
@@ -692,7 +692,7 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 
 ## Test Coverage
 
-Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 tests passing**, **100% pass rate**, **1,883 ms** total runtime, including locale-safe `System.runAs` and `Security.stripInaccessible` verification):
+Verified on Salesforce API `v62.0` (Test Run ID `707d200001GFUM4AAP` — **26/26 tests passing**, **100% pass rate**, **2,366 ms** total runtime, using modern `Assert.*`, native `System.StubProvider` / `Test.createStub`, locale-safe `System.runAs`, and `Security.stripInaccessible` verification):
 
 | Apex Class                                                                                               | Responsibility                                              | Verified Coverage |
 | :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- | :---------------: |
