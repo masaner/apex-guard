@@ -47,7 +47,13 @@ Enterprise Apex codebases quickly accumulate defensive `if/else` pyramids (the *
 
 **ApexGuard**—inspired by Microsoft's `.NET CommunityToolkit.Diagnostics.Guard`—replaces boilerplate defensive branching with a single, positive-assertion `Guard` facade featuring **zero external dependencies**, **zero SOQL/DML**, and **universal runtime awareness**.
 
-https://github.com/masaner/apex-guard/releases/download/v1.0.0/apexguard-v2-master.mp4
+<div align="center">
+  <a href="https://github.com/masaner/apex-guard/releases/download/v1.0.0/apexguard-github-under-10mb.mp4">
+    <img src="./assets/video-player-preview.png" alt="Watch the 45-second ApexGuard Demo Video (With Audio)" width="100%" />
+  </a>
+  <br />
+  <sub><strong>▶ Click to play/download the 45-second HD walkthrough with audio</strong> (<code>apexguard-github-under-10mb.mp4</code>)</sub>
+</div>
 
 <table>
 <tr>
@@ -127,14 +133,14 @@ public Id processOrder(
 </tr>
 </table>
 
-| Metric | Legacy `if/else` Validation | **ApexGuard (`Guard`)** |
-| :--- | :--- | :--- |
-| **Precondition Lines** | 25–35 lines per service method | **1 line per invariant** |
-| **Cyclomatic Nesting Depth** | 3–5 levels deep | **Flat (0 levels)** |
-| **Assignment & Validation** | Two separate statements | **Single-line pass-through return values** |
-| **LWC Error Surface** | Often fails with `"Script-thrown exception"` | **Auto `AuraHandledException` + `setMessage()`** |
-| **Trigger Bulk Validation** | Manual `addError()` boilerplate per field | **Fluent `Guard.onRecord(rec)` partial-DML builder** |
-| **SOQL / DML Overhead** | Custom metadata queries in some frameworks | **0 SOQL Queries / 0 DML Statements** |
+| Metric                       | Legacy `if/else` Validation                  | **ApexGuard (`Guard`)**                              |
+| :--------------------------- | :------------------------------------------- | :--------------------------------------------------- |
+| **Precondition Lines**       | 25–35 lines per service method               | **1 line per invariant**                             |
+| **Cyclomatic Nesting Depth** | 3–5 levels deep                              | **Flat (0 levels)**                                  |
+| **Assignment & Validation**  | Two separate statements                      | **Single-line pass-through return values**           |
+| **LWC Error Surface**        | Often fails with `"Script-thrown exception"` | **Auto `AuraHandledException` + `setMessage()`**     |
+| **Trigger Bulk Validation**  | Manual `addError()` boilerplate per field    | **Fluent `Guard.onRecord(rec)` partial-DML builder** |
+| **SOQL / DML Overhead**      | Custom metadata queries in some frameworks   | **0 SOQL Queries / 0 DML Statements**                |
 
 > [!TIP]
 > **Positive Assertion Naming + Pass-Through Return Values:** Every `Guard` method states the **valid condition required to continue** (`Guard.isNotBlank`, `Guard.isGreaterThan`, `Guard.isIdOfType`) and returns the validated value so you can check and assign in one clean expression:
@@ -208,8 +214,8 @@ force-app/main/default/
 
 Install directly into any org in one click (no CLI setup required):
 
-* [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
-* [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+- [Unlocked Package Installation (Production)](https://login.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
+- [Unlocked Package Installation (Sandbox)](https://test.salesforce.com/packaging/installPackage.apexp?p0=04td2000000WiM5AAK)
 
 Or install via Salesforce CLI (`sf`):
 
@@ -219,8 +225,9 @@ sf package install --package 04td2000000WiM5AAK --security-type AllUsers --apex-
 
 > [!TIP]
 > **Recommended Package Install Screen Selections:**
-> * **Security Level:** Choose **Install for All Users** so non-admin users running **Screen Flows** or **Agentforce Actions** automatically have Apex Class Access to `GuardFlowAction` (`@InvocableMethod`). Least-privilege orgs can choose **Install for Admins Only** (`Guard.*` calls in Apex/Triggers/LWC still work for all users, and admins can grant `GuardFlowAction` via a Permission Set).
-> * **Advanced Options → Apex Compile:** Choose **Compile only the Apex in the package** so installation completes in seconds without recompiling unrelated org Apex.
+>
+> - **Security Level:** Choose **Install for All Users** so non-admin users running **Screen Flows** or **Agentforce Actions** automatically have Apex Class Access to `GuardFlowAction` (`@InvocableMethod`). Least-privilege orgs can choose **Install for Admins Only** (`Guard.*` calls in Apex/Triggers/LWC still work for all users, and admins can grant `GuardFlowAction` via a Permission Set).
+> - **Advanced Options → Apex Compile:** Choose **Compile only the Apex in the package** so installation completes in seconds without recompiling unrelated org Apex.
 
 ### Option 2: Deploy Source via Salesforce CLI (`sf`)
 
@@ -306,20 +313,20 @@ npx skills add masaner/apex-guard -g --agent antigravity --skill '*' -y
 npx skills add masaner/apex-guard --list
 ```
 
-| Category | Skill | Coverage |
-| :--- | :--- | :--- |
-| **Setup** | [`apex-guard-install`](skills/apex-guard-install/SKILL.md) | 2GP Unlocked Package (`04td2000000WiM5AAK`), SFDX deploy, install options, `ApexTestSuite`, smoke test |
-| **Usage** | [`apex-guard-usage`](skills/apex-guard-usage/SKILL.md) | Positive-assertion pass-throughs, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST/Async `toMap()` |
-| **Usage** | [`apex-guard-triggers-and-bulk-dml`](skills/apex-guard-triggers-and-bulk-dml/SKILL.md) | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()` |
-| **Usage** | [`apex-guard-flows-and-agentforce`](skills/apex-guard-flows-and-agentforce/SKILL.md) | `GuardFlowAction` `@InvocableMethod`, all 18 rules, Fault paths vs. Decision routing (`throwOnFailure = false`) |
-| **Usage** | [`apex-guard-testing`](skills/apex-guard-testing/SKILL.md) | Unit testing `GuardException`, `Guard.forLwc()` / `testQuiddityOverride`, DML-free `GuardRecord`, locale-safe `System.runAs` |
-| **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns |
-| **Extending** | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md) | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants |
+| Category       | Skill                                                                                              | Coverage                                                                                                                     |
+| :------------- | :------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| **Setup**      | [`apex-guard-install`](skills/apex-guard-install/SKILL.md)                                         | 2GP Unlocked Package (`04td2000000WiM5AAK`), SFDX deploy, install options, `ApexTestSuite`, smoke test                       |
+| **Usage**      | [`apex-guard-usage`](skills/apex-guard-usage/SKILL.md)                                             | Positive-assertion pass-throughs, `Set`/`Map` overloads, LWC `Quiddity.AURA` & `Guard.forLwc()`, REST/Async `toMap()`        |
+| **Usage**      | [`apex-guard-triggers-and-bulk-dml`](skills/apex-guard-triggers-and-bulk-dml/SKILL.md)             | Non-throwing `Guard.onRecord()`, `addError()` accumulation, partial DML (`allOrNone = false`), `.skipInaccessible()`         |
+| **Usage**      | [`apex-guard-flows-and-agentforce`](skills/apex-guard-flows-and-agentforce/SKILL.md)               | `GuardFlowAction` `@InvocableMethod`, all 18 rules, Fault paths vs. Decision routing (`throwOnFailure = false`)              |
+| **Usage**      | [`apex-guard-testing`](skills/apex-guard-testing/SKILL.md)                                         | Unit testing `GuardException`, `Guard.forLwc()` / `testQuiddityOverride`, DML-free `GuardRecord`, locale-safe `System.runAs` |
+| **Governance** | [`apex-guard-security-and-best-practices`](skills/apex-guard-security-and-best-practices/SKILL.md) | `inherited sharing`, `isSet()` sparse-SOQL safety, opt-in CRUD/FLS vs. Triggers, 0 SOQL/DML, anti-patterns                   |
+| **Extending**  | [`apex-guard-extensibility-and-logging`](skills/apex-guard-extensibility-and-logging/SKILL.md)     | `IGuardFailureHandler`, Nebula Logger (`PublishImmediately` rollback safety), custom exceptions, 30 error constants          |
 
-* **Quick How-To Guide:** [How to Add & Use AI Agent Skills (`docs/how-to-use-skills.md`)](docs/how-to-use-skills.md)
-* **Live skills.sh Page:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
-* **Companion Spec Workflow Repo:** [github.com/masaner/meric-spec](https://github.com/masaner/meric-spec) (`npx skills add masaner/meric-spec`)
-* **Full Reference & Manifest:** [`docs/ai-agent-skills.md`](docs/ai-agent-skills.md) • [`skills/README.md`](skills/README.md) • [`skills.sh.json`](skills.sh.json)
+- **Quick How-To Guide:** [How to Add & Use AI Agent Skills (`docs/how-to-use-skills.md`)](docs/how-to-use-skills.md)
+- **Live skills.sh Page:** [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard)
+- **Companion Spec Workflow Repo:** [github.com/masaner/meric-spec](https://github.com/masaner/meric-spec) (`npx skills add masaner/meric-spec`)
+- **Full Reference & Manifest:** [`docs/ai-agent-skills.md`](docs/ai-agent-skills.md) • [`skills/README.md`](skills/README.md) • [`skills.sh.json`](skills.sh.json)
 
 ---
 
@@ -331,31 +338,31 @@ Use single-line pass-through return values in constructors, domain objects, and 
 
 ```apex
 public with sharing class InvoiceCalculatorService {
-    private final Id accountId;
-    private final Decimal taxRate;
-    private final String currencyCode;
+  private final Id accountId;
+  private final Decimal taxRate;
+  private final String currencyCode;
 
-    public InvoiceCalculatorService(
-        String rawAccountId,
-        Decimal taxRate,
-        String currencyCode,
-        Account billedAccount
-    ) {
-        this.accountId = Guard.isIdOfType(
-            Guard.isValidId(rawAccountId, 'rawAccountId'),
-            Account.SObjectType,
-            'rawAccountId'
-        );
-        this.taxRate = Guard.isInRange(taxRate, 0, 1, 'taxRate');
-        this.currencyCode = Guard.hasLengthEqualTo(
-            Guard.isNotBlank(currencyCode, 'currencyCode'),
-            3,
-            'currencyCode'
-        );
+  public InvoiceCalculatorService(
+    String rawAccountId,
+    Decimal taxRate,
+    String currencyCode,
+    Account billedAccount
+  ) {
+    this.accountId = Guard.isIdOfType(
+      Guard.isValidId(rawAccountId, 'rawAccountId'),
+      Account.SObjectType,
+      'rawAccountId'
+    );
+    this.taxRate = Guard.isInRange(taxRate, 0, 1, 'taxRate');
+    this.currencyCode = Guard.hasLengthEqualTo(
+      Guard.isNotBlank(currencyCode, 'currencyCode'),
+      3,
+      'currencyCode'
+    );
 
-        // Safely verifies field is BOTH queried/set in memory AND non-null
-        Guard.hasPopulatedField(billedAccount, Account.BillingCountry, 'billedAccount');
-    }
+    // Safely verifies field is BOTH queried/set in memory AND non-null
+    Guard.hasPopulatedField(billedAccount, Account.BillingCountry, 'billedAccount');
+  }
 }
 ```
 
@@ -371,23 +378,24 @@ When Apex executes inside an Aura/LWC request (`System.Quiddity.AURA`), `Guard` 
 ```apex
 // Apex Controller — BudgetController.cls
 public with sharing class BudgetController {
-    @AuraEnabled
-    public static Account updateQuarterlyBudget(String accountIdStr, Decimal budget) {
-        // Explicit scope or automatic Quiddity.AURA detection — both call setMessage()!
-        Id accountId = Guard.forLwc().isIdOfType(
-            Guard.forLwc().isValidId(accountIdStr, 'accountIdStr'),
-            Account.SObjectType,
-            'accountIdStr'
-        );
-        // Opt-in running-user CRUD & FLS enforcement (useful in @AuraEnabled / user-mode entry points)
-        Guard.forLwc().isUpdateable(Account.SObjectType);
-        Guard.forLwc().isFieldUpdateable(Account.AnnualRevenue);
-        Guard.forLwc().isGreaterThan(budget, 0, 'budget');
+  @AuraEnabled
+  public static Account updateQuarterlyBudget(String accountIdStr, Decimal budget) {
+    // Explicit scope or automatic Quiddity.AURA detection — both call setMessage()!
+    Id accountId = Guard.forLwc()
+      .isIdOfType(
+        Guard.forLwc().isValidId(accountIdStr, 'accountIdStr'),
+        Account.SObjectType,
+        'accountIdStr'
+      );
+    // Opt-in running-user CRUD & FLS enforcement (useful in @AuraEnabled / user-mode entry points)
+    Guard.forLwc().isUpdateable(Account.SObjectType);
+    Guard.forLwc().isFieldUpdateable(Account.AnnualRevenue);
+    Guard.forLwc().isGreaterThan(budget, 0, 'budget');
 
-        Account acc = new Account(Id = accountId, AnnualRevenue = budget);
-        update as user acc;
-        return acc;
-    }
+    Account acc = new Account(Id = accountId, AnnualRevenue = budget);
+    update as user acc;
+    return acc;
+  }
 }
 ```
 
@@ -398,20 +406,20 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import updateQuarterlyBudget from '@salesforce/apex/BudgetController.updateQuarterlyBudget';
 
 export default class BudgetEditor extends LightningElement {
-    async handleSave() {
-        try {
-            await updateQuarterlyBudget({
-                accountIdStr: this.recordId,
-                budget: this.budgetAmount
-            });
-        } catch (error) {
-            // Displays the exact message: "Parameter 'budget' must be greater than 0, but was -500."
-            const message = error?.body?.message || 'Unexpected error';
-            this.dispatchEvent(
-                new ShowToastEvent({ title: 'Validation Error', message, variant: 'error' })
-            );
-        }
+  async handleSave() {
+    try {
+      await updateQuarterlyBudget({
+        accountIdStr: this.recordId,
+        budget: this.budgetAmount
+      });
+    } catch (error) {
+      // Displays the exact message: "Parameter 'budget' must be greater than 0, but was -500."
+      const message = error?.body?.message || 'Unexpected error';
+      this.dispatchEvent(
+        new ShowToastEvent({ title: 'Validation Error', message, variant: 'error' })
+      );
     }
+  }
 }
 ```
 
@@ -426,19 +434,19 @@ Combine **fail-fast structural guards** (`Guard.isNotEmpty(Trigger.new, ...)`) w
 
 ```apex
 public with sharing class AccountTriggerHandler {
-    public static void beforeSave(List<Account> newAccounts) {
-        // Structural precondition: fails fast if called improperly with empty/null batch
-        Guard.isNotEmpty(newAccounts, 'newAccounts');
+  public static void beforeSave(List<Account> newAccounts) {
+    // Structural precondition: fails fast if called improperly with empty/null batch
+    Guard.isNotEmpty(newAccounts, 'newAccounts');
 
-        for (Account acc : newAccounts) {
-            Guard.onRecord(acc)
-                .isNotBlank(Account.Name, 'Account Name is required.')
-                .isGreaterThan(Account.AnnualRevenue, 0, 'Annual Revenue must be positive.')
-                .hasMaxLength(Account.TickerSymbol, 5)
-                .matchesRegex(Account.AccountNumber, '^ACC-[0-9]{4}$')
-                .hasPopulatedField(Account.Industry);
-        }
+    for (Account acc : newAccounts) {
+      Guard.onRecord(acc)
+        .isNotBlank(Account.Name, 'Account Name is required.')
+        .isGreaterThan(Account.AnnualRevenue, 0, 'Annual Revenue must be positive.')
+        .hasMaxLength(Account.TickerSymbol, 5)
+        .matchesRegex(Account.AccountNumber, '^ACC-[0-9]{4}$')
+        .hasPopulatedField(Account.Industry);
     }
+  }
 }
 ```
 
@@ -473,16 +481,17 @@ Database.SaveResult[] results = Database.insert(accounts, false);
 
 Search for **`Validate Input (ApexGuard)`** (`GuardFlowAction`) in Flow Builder or Agentforce Action Configuration:
 
-| Flow Use Case | `Throw On Failure` Setting | Behavior |
-| :--- | :---: | :--- |
-| **Fail-Fast / Fault Path** | `true` *(default)* | Rolls back transaction on invalid input and triggers your Flow **Fault Connector** with full diagnostic details. |
-| **Decision Branching / Agentforce Loop** | `false` | Never throws! Returns `isValid = false`, `errorMessage`, `errorCode`, `paramName`, and `executionContext` so Flows route via Decision elements or Agentforce prompts the user to fix the input. |
+| Flow Use Case                            | `Throw On Failure` Setting | Behavior                                                                                                                                                                                        |
+| :--------------------------------------- | :------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Fail-Fast / Fault Path**               |     `true` _(default)_     | Rolls back transaction on invalid input and triggers your Flow **Fault Connector** with full diagnostic details.                                                                                |
+| **Decision Branching / Agentforce Loop** |          `false`           | Never throws! Returns `isValid = false`, `errorMessage`, `errorCode`, `paramName`, and `executionContext` so Flows route via Decision elements or Agentforce prompts the user to fix the input. |
 
 <details>
 <summary><strong>Click to view all Flow Action Inputs, Outputs &amp; 18 Supported Rules</strong></summary>
 
 #### Invocable Request Inputs (`GuardFlowAction.Request`)
-- `rule` *(required)*: Rule identifier (case-insensitive)
+
+- `rule` _(required)_: Rule identifier (case-insensitive)
 - `paramName`: Logical parameter or field label for diagnostics
 - `stringValue`, `numericValue`, `booleanValue`, `recordValue`: Typed value inputs
 - `comparisonValue`: Regex pattern, SObject API name (e.g., `Account`), or string-encoded threshold
@@ -491,9 +500,11 @@ Search for **`Validate Input (ApexGuard)`** (`GuardFlowAction`) in Flow Builder 
 - `throwOnFailure`: Boolean (`true` default = throw; `false` = return `Result`)
 
 #### Invocable Response Outputs (`GuardFlowAction.Result`)
+
 - `isValid` (`Boolean`), `errorMessage` (`String`), `errorCode` (`String`), `paramName` (`String`), `executionContext` (`String`)
 
 #### All 18 Supported Flow / Agentforce Rules
+
 `IS_NOT_NULL` • `IS_NULL` • `IS_TRUE` • `IS_FALSE` • `IS_NOT_EMPTY` • `IS_NOT_BLANK` • `HAS_LENGTH_EQUAL_TO` • `HAS_MAX_LENGTH` • `MATCHES_REGEX` • `IS_GREATER_THAN` • `IS_GREATER_THAN_OR_EQUAL_TO` • `IS_LESS_THAN` • `IS_LESS_THAN_OR_EQUAL_TO` • `IS_IN_RANGE` • `IS_NOT_ZERO` • `IS_VALID_ID` • `IS_ID_OF_TYPE` • `IS_SOBJECT_TYPE`
 
 </details>
@@ -507,25 +518,25 @@ Search for **`Validate Input (ApexGuard)`** (`GuardFlowAction`) in Flow Builder 
 ```apex
 @RestResource(urlMapping='/v1/orders/*')
 global with sharing class OrderRestEndpoint {
-    @HttpPost
-    global static void createOrder(String accountId, Decimal amount) {
-        RestResponse res = RestContext.response;
-        try {
-            Id validAccountId = Guard.isIdOfType(
-                Guard.isValidId(accountId, 'accountId'),
-                Account.SObjectType,
-                'accountId'
-            );
-            Guard.isGreaterThan(amount, 0, 'amount');
+  @HttpPost
+  global static void createOrder(String accountId, Decimal amount) {
+    RestResponse res = RestContext.response;
+    try {
+      Id validAccountId = Guard.isIdOfType(
+        Guard.isValidId(accountId, 'accountId'),
+        Account.SObjectType,
+        'accountId'
+      );
+      Guard.isGreaterThan(amount, 0, 'amount');
 
-            // Process order...
-            res.statusCode = 201;
-        } catch (GuardException ex) {
-            res.statusCode = 400;
-            res.addHeader('Content-Type', 'application/json');
-            res.responseBody = Blob.valueOf(JSON.serialize(ex.toMap()));
-        }
+      // Process order...
+      res.statusCode = 201;
+    } catch (GuardException ex) {
+      res.statusCode = 400;
+      res.addHeader('Content-Type', 'application/json');
+      res.responseBody = Blob.valueOf(JSON.serialize(ex.toMap()));
     }
+  }
 }
 ```
 
@@ -547,26 +558,26 @@ global with sharing class OrderRestEndpoint {
 
 ```apex
 public class OrderSyncQueueable implements Queueable, System.Finalizer {
-    private final Id orderId;
+  private final Id orderId;
 
-    public OrderSyncQueueable(String rawOrderId) {
-        this.orderId = Guard.isValidId(rawOrderId, 'rawOrderId');
-    }
+  public OrderSyncQueueable(String rawOrderId) {
+    this.orderId = Guard.isValidId(rawOrderId, 'rawOrderId');
+  }
 
-    public void execute(QueueableContext context) {
-        System.attachFinalizer(this);
-        // Perform sync...
-    }
+  public void execute(QueueableContext context) {
+    System.attachFinalizer(this);
+    // Perform sync...
+  }
 
-    public void execute(FinalizerContext context) {
-        if (context.getResult() == ParentJobResult.UNHANDLED_EXCEPTION) {
-            Exception ex = context.getException();
-            if (ex instanceof GuardException) {
-                Map<String, Object> diagnostics = ((GuardException) ex).toMap();
-                // Publish structured GuardException metadata to Platform Event / Log object
-            }
-        }
+  public void execute(FinalizerContext context) {
+    if (context.getResult() == ParentJobResult.UNHANDLED_EXCEPTION) {
+      Exception ex = context.getException();
+      if (ex instanceof GuardException) {
+        Map<String, Object> diagnostics = ((GuardException) ex).toMap();
+        // Publish structured GuardException metadata to Platform Event / Log object
+      }
     }
+  }
 }
 ```
 
@@ -621,37 +632,37 @@ Guard.setFailureHandler(new NebulaGuardFailureHandler());
 
 Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) supports three overloads: default diagnostic message `(..., paramName)`, custom message `(..., paramName, customMessage)`, and explicit exception `(..., customException)` (boolean assertions omit `paramName` and accept `message` or `customException`).
 
-| Category | Method | Returns | Error Code Constant |
-| :--- | :--- | :--- | :--- |
-| **Nullability** | `Guard.isNotNull(value, paramName)` | `Object` | `GUARD_NULL_VALUE` |
-| | `Guard.isNull(value, paramName)` | `Object` (`null`) | `GUARD_NOT_NULL_VALUE` |
-| **Boolean / State** | `Guard.isTrue(condition, message)` | `Boolean` (`true`) | `GUARD_TRUE_EXPECTED` |
-| | `Guard.isFalse(condition, message)` | `Boolean` (`false`) | `GUARD_FALSE_EXPECTED` |
-| **Strings** | `Guard.isNotEmpty(value, paramName)` | `String` | `GUARD_EMPTY_STRING` |
-| | `Guard.isNotBlank(value, paramName)` | `String` | `GUARD_BLANK_STRING` |
-| | `Guard.hasLengthEqualTo(value, expectedLength, paramName)` | `String` | `GUARD_STRING_LENGTH` |
-| | `Guard.hasMaxLength(value, maxLength, paramName)` | `String` | `GUARD_MAX_LENGTH` |
-| | `Guard.matchesRegex(value, regexPattern, paramName)` | `String` | `GUARD_REGEX_MISMATCH` |
-| **Numeric** | `Guard.isGreaterThan(value, minExclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_GREATER_THAN` |
-| *(`Decimal`, `Integer`, `Long`,* | `Guard.isGreaterThanOrEqualTo(value, minInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_GREATER_OR_EQUAL` |
-| *and `Double` widening)* | `Guard.isLessThan(value, maxExclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_LESS_THAN` |
-| | `Guard.isLessThanOrEqualTo(value, maxInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_LESS_OR_EQUAL` |
-| | `Guard.isInRange(value, minInclusive, maxInclusive, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_OUT_OF_RANGE` |
-| | `Guard.isNotZero(value, paramName)` | `Decimal` / `Integer` / `Long` | `GUARD_ZERO_VALUE` |
-| **Collections** | `Guard.isNotEmpty(collection, paramName)` | `List` / `Set` / `Map` | `GUARD_EMPTY_COLLECTION` |
-| *(Zero-copy Apex `Set` &* | `Guard.hasSizeEqualTo(collection, expectedSize, paramName)` | `List` / `Set` / `Map` | `GUARD_COLLECTION_SIZE` |
-| *`Map` overloads)* | `Guard.containsKey(inputMap, key, paramName)` | `Map` | `GUARD_MISSING_KEY` |
-| **Salesforce-Native** | `Guard.isValidId(value, paramName)` | `Id` | `GUARD_INVALID_ID` |
-| | `Guard.isIdOfType(recordId, expectedType, paramName)` | `Id` | `GUARD_ID_SOBJECT_TYPE` |
-| | `Guard.isSObjectType(record, expectedType, paramName)` | `SObject` | `GUARD_SOBJECT_TYPE` |
-| | `Guard.hasPopulatedField(record, field, paramName)` | `SObject` | `GUARD_UNPOPULATED_FIELD` |
-| **Schema CRUD & FLS** | `Guard.isAccessible(sObjectType)` / `isCreateable` / `isUpdateable` / `isDeletable` | `Schema.SObjectType` | `GUARD_SOBJECT_NOT_*` |
-| *(Opt-in, zero SOQL)* | `Guard.isFieldAccessible(field)` / `isFieldCreateable` / `isFieldUpdateable` | `Schema.SObjectField` | `GUARD_FIELD_NOT_*` |
-| **Context & Hooks** | `Guard.onRecord(record)` *(with `.skipInaccessible()` & FLS checks)* | `GuardRecord` | Field/Record `addError()` |
-| | `Guard.forLwc()` / `Guard.disableLwcMode()` | `GuardContext.LwcScope` / `void` | `AuraHandledException` |
-| | `Guard.setAutoDetectAuraQuiddity(enabled)` | `void` | Context config |
-| | `Guard.setFailureHandler(handler)` / `Guard.resetFailureHandler()` | `void` | `IGuardFailureHandler` |
-| | `Guard.resetContext()` | `void` | Resets transaction config |
+| Category                         | Method                                                                              | Returns                          | Error Code Constant       |
+| :------------------------------- | :---------------------------------------------------------------------------------- | :------------------------------- | :------------------------ |
+| **Nullability**                  | `Guard.isNotNull(value, paramName)`                                                 | `Object`                         | `GUARD_NULL_VALUE`        |
+|                                  | `Guard.isNull(value, paramName)`                                                    | `Object` (`null`)                | `GUARD_NOT_NULL_VALUE`    |
+| **Boolean / State**              | `Guard.isTrue(condition, message)`                                                  | `Boolean` (`true`)               | `GUARD_TRUE_EXPECTED`     |
+|                                  | `Guard.isFalse(condition, message)`                                                 | `Boolean` (`false`)              | `GUARD_FALSE_EXPECTED`    |
+| **Strings**                      | `Guard.isNotEmpty(value, paramName)`                                                | `String`                         | `GUARD_EMPTY_STRING`      |
+|                                  | `Guard.isNotBlank(value, paramName)`                                                | `String`                         | `GUARD_BLANK_STRING`      |
+|                                  | `Guard.hasLengthEqualTo(value, expectedLength, paramName)`                          | `String`                         | `GUARD_STRING_LENGTH`     |
+|                                  | `Guard.hasMaxLength(value, maxLength, paramName)`                                   | `String`                         | `GUARD_MAX_LENGTH`        |
+|                                  | `Guard.matchesRegex(value, regexPattern, paramName)`                                | `String`                         | `GUARD_REGEX_MISMATCH`    |
+| **Numeric**                      | `Guard.isGreaterThan(value, minExclusive, paramName)`                               | `Decimal` / `Integer` / `Long`   | `GUARD_GREATER_THAN`      |
+| _(`Decimal`, `Integer`, `Long`,_ | `Guard.isGreaterThanOrEqualTo(value, minInclusive, paramName)`                      | `Decimal` / `Integer` / `Long`   | `GUARD_GREATER_OR_EQUAL`  |
+| _and `Double` widening)_         | `Guard.isLessThan(value, maxExclusive, paramName)`                                  | `Decimal` / `Integer` / `Long`   | `GUARD_LESS_THAN`         |
+|                                  | `Guard.isLessThanOrEqualTo(value, maxInclusive, paramName)`                         | `Decimal` / `Integer` / `Long`   | `GUARD_LESS_OR_EQUAL`     |
+|                                  | `Guard.isInRange(value, minInclusive, maxInclusive, paramName)`                     | `Decimal` / `Integer` / `Long`   | `GUARD_OUT_OF_RANGE`      |
+|                                  | `Guard.isNotZero(value, paramName)`                                                 | `Decimal` / `Integer` / `Long`   | `GUARD_ZERO_VALUE`        |
+| **Collections**                  | `Guard.isNotEmpty(collection, paramName)`                                           | `List` / `Set` / `Map`           | `GUARD_EMPTY_COLLECTION`  |
+| _(Zero-copy Apex `Set` &_        | `Guard.hasSizeEqualTo(collection, expectedSize, paramName)`                         | `List` / `Set` / `Map`           | `GUARD_COLLECTION_SIZE`   |
+| _`Map` overloads)_               | `Guard.containsKey(inputMap, key, paramName)`                                       | `Map`                            | `GUARD_MISSING_KEY`       |
+| **Salesforce-Native**            | `Guard.isValidId(value, paramName)`                                                 | `Id`                             | `GUARD_INVALID_ID`        |
+|                                  | `Guard.isIdOfType(recordId, expectedType, paramName)`                               | `Id`                             | `GUARD_ID_SOBJECT_TYPE`   |
+|                                  | `Guard.isSObjectType(record, expectedType, paramName)`                              | `SObject`                        | `GUARD_SOBJECT_TYPE`      |
+|                                  | `Guard.hasPopulatedField(record, field, paramName)`                                 | `SObject`                        | `GUARD_UNPOPULATED_FIELD` |
+| **Schema CRUD & FLS**            | `Guard.isAccessible(sObjectType)` / `isCreateable` / `isUpdateable` / `isDeletable` | `Schema.SObjectType`             | `GUARD_SOBJECT_NOT_*`     |
+| _(Opt-in, zero SOQL)_            | `Guard.isFieldAccessible(field)` / `isFieldCreateable` / `isFieldUpdateable`        | `Schema.SObjectField`            | `GUARD_FIELD_NOT_*`       |
+| **Context & Hooks**              | `Guard.onRecord(record)` _(with `.skipInaccessible()` & FLS checks)_                | `GuardRecord`                    | Field/Record `addError()` |
+|                                  | `Guard.forLwc()` / `Guard.disableLwcMode()`                                         | `GuardContext.LwcScope` / `void` | `AuraHandledException`    |
+|                                  | `Guard.setAutoDetectAuraQuiddity(enabled)`                                          | `void`                           | Context config            |
+|                                  | `Guard.setFailureHandler(handler)` / `Guard.resetFailureHandler()`                  | `void`                           | `IGuardFailureHandler`    |
+|                                  | `Guard.resetContext()`                                                              | `void`                           | Resets transaction config |
 
 > [!TIP]
 > **Apex `Set` & `Map` Ergonomics:** Because Apex `Set<T>` is invariant and `Map<K, V>` keys are invariant, `Guard` ships explicit overloads for `Set<Id>`, `Set<String>`, `Set<Integer>`, `Set<Object>`, `Map<Id, SObject>`, `Map<String, Object>`, `Map<String, String>`, and `Map<Object, Object>`—zero wrapper allocations required (`Guard.isNotEmpty(accountIds, 'accountIds')` works directly!). Note: `hasSizeEqualTo` supports `List<Object>`, `Set<Id/String/Object>`, and `Map<Id, SObject>` / `Map<String, Object>` / `Map<Object, Object>`.
@@ -659,23 +670,23 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 <details>
 <summary><strong>Click to view all 30 Standardized Error Code Constants (<code>GuardException</code>)</strong></summary>
 
-| Constant | String Value | Constant | String Value |
-| :--- | :--- | :--- | :--- |
-| `GuardException.ERR_NULL_VALUE` | `'GUARD_NULL_VALUE'` | `GuardException.ERR_COLLECTION_SIZE` | `'GUARD_COLLECTION_SIZE'` |
-| `GuardException.ERR_NOT_NULL_VALUE` | `'GUARD_NOT_NULL_VALUE'` | `GuardException.ERR_MISSING_KEY` | `'GUARD_MISSING_KEY'` |
-| `GuardException.ERR_TRUE_EXPECTED` | `'GUARD_TRUE_EXPECTED'` | `GuardException.ERR_INVALID_ID` | `'GUARD_INVALID_ID'` |
-| `GuardException.ERR_FALSE_EXPECTED` | `'GUARD_FALSE_EXPECTED'` | `GuardException.ERR_ID_SOBJECT_TYPE` | `'GUARD_ID_SOBJECT_TYPE'` |
-| `GuardException.ERR_EMPTY_STRING` | `'GUARD_EMPTY_STRING'` | `GuardException.ERR_SOBJECT_TYPE` | `'GUARD_SOBJECT_TYPE'` |
-| `GuardException.ERR_BLANK_STRING` | `'GUARD_BLANK_STRING'` | `GuardException.ERR_UNPOPULATED_FIELD` | `'GUARD_UNPOPULATED_FIELD'` |
-| `GuardException.ERR_STRING_LENGTH` | `'GUARD_STRING_LENGTH'` | `GuardException.ERR_SOBJECT_NOT_ACCESSIBLE` | `'GUARD_SOBJECT_NOT_ACCESSIBLE'` |
-| `GuardException.ERR_MAX_LENGTH` | `'GUARD_MAX_LENGTH'` | `GuardException.ERR_SOBJECT_NOT_CREATEABLE` | `'GUARD_SOBJECT_NOT_CREATEABLE'` |
-| `GuardException.ERR_REGEX_MISMATCH` | `'GUARD_REGEX_MISMATCH'` | `GuardException.ERR_SOBJECT_NOT_UPDATEABLE` | `'GUARD_SOBJECT_NOT_UPDATEABLE'` |
-| `GuardException.ERR_GREATER_THAN` | `'GUARD_GREATER_THAN'` | `GuardException.ERR_SOBJECT_NOT_DELETABLE` | `'GUARD_SOBJECT_NOT_DELETABLE'` |
-| `GuardException.ERR_GREATER_OR_EQUAL` | `'GUARD_GREATER_OR_EQUAL'` | `GuardException.ERR_FIELD_NOT_ACCESSIBLE` | `'GUARD_FIELD_NOT_ACCESSIBLE'` |
-| `GuardException.ERR_LESS_THAN` | `'GUARD_LESS_THAN'` | `GuardException.ERR_FIELD_NOT_CREATEABLE` | `'GUARD_FIELD_NOT_CREATEABLE'` |
-| `GuardException.ERR_LESS_OR_EQUAL` | `'GUARD_LESS_OR_EQUAL'` | `GuardException.ERR_FIELD_NOT_UPDATEABLE` | `'GUARD_FIELD_NOT_UPDATEABLE'` |
-| `GuardException.ERR_OUT_OF_RANGE` | `'GUARD_OUT_OF_RANGE'` | `GuardException.ERR_INVALID_GUARD_ARGUMENT` | `'GUARD_INVALID_ARGUMENT'` |
-| `GuardException.ERR_ZERO_VALUE` | `'GUARD_ZERO_VALUE'` | `GuardException.ERR_EMPTY_COLLECTION` | `'GUARD_EMPTY_COLLECTION'` |
+| Constant                              | String Value               | Constant                                    | String Value                     |
+| :------------------------------------ | :------------------------- | :------------------------------------------ | :------------------------------- |
+| `GuardException.ERR_NULL_VALUE`       | `'GUARD_NULL_VALUE'`       | `GuardException.ERR_COLLECTION_SIZE`        | `'GUARD_COLLECTION_SIZE'`        |
+| `GuardException.ERR_NOT_NULL_VALUE`   | `'GUARD_NOT_NULL_VALUE'`   | `GuardException.ERR_MISSING_KEY`            | `'GUARD_MISSING_KEY'`            |
+| `GuardException.ERR_TRUE_EXPECTED`    | `'GUARD_TRUE_EXPECTED'`    | `GuardException.ERR_INVALID_ID`             | `'GUARD_INVALID_ID'`             |
+| `GuardException.ERR_FALSE_EXPECTED`   | `'GUARD_FALSE_EXPECTED'`   | `GuardException.ERR_ID_SOBJECT_TYPE`        | `'GUARD_ID_SOBJECT_TYPE'`        |
+| `GuardException.ERR_EMPTY_STRING`     | `'GUARD_EMPTY_STRING'`     | `GuardException.ERR_SOBJECT_TYPE`           | `'GUARD_SOBJECT_TYPE'`           |
+| `GuardException.ERR_BLANK_STRING`     | `'GUARD_BLANK_STRING'`     | `GuardException.ERR_UNPOPULATED_FIELD`      | `'GUARD_UNPOPULATED_FIELD'`      |
+| `GuardException.ERR_STRING_LENGTH`    | `'GUARD_STRING_LENGTH'`    | `GuardException.ERR_SOBJECT_NOT_ACCESSIBLE` | `'GUARD_SOBJECT_NOT_ACCESSIBLE'` |
+| `GuardException.ERR_MAX_LENGTH`       | `'GUARD_MAX_LENGTH'`       | `GuardException.ERR_SOBJECT_NOT_CREATEABLE` | `'GUARD_SOBJECT_NOT_CREATEABLE'` |
+| `GuardException.ERR_REGEX_MISMATCH`   | `'GUARD_REGEX_MISMATCH'`   | `GuardException.ERR_SOBJECT_NOT_UPDATEABLE` | `'GUARD_SOBJECT_NOT_UPDATEABLE'` |
+| `GuardException.ERR_GREATER_THAN`     | `'GUARD_GREATER_THAN'`     | `GuardException.ERR_SOBJECT_NOT_DELETABLE`  | `'GUARD_SOBJECT_NOT_DELETABLE'`  |
+| `GuardException.ERR_GREATER_OR_EQUAL` | `'GUARD_GREATER_OR_EQUAL'` | `GuardException.ERR_FIELD_NOT_ACCESSIBLE`   | `'GUARD_FIELD_NOT_ACCESSIBLE'`   |
+| `GuardException.ERR_LESS_THAN`        | `'GUARD_LESS_THAN'`        | `GuardException.ERR_FIELD_NOT_CREATEABLE`   | `'GUARD_FIELD_NOT_CREATEABLE'`   |
+| `GuardException.ERR_LESS_OR_EQUAL`    | `'GUARD_LESS_OR_EQUAL'`    | `GuardException.ERR_FIELD_NOT_UPDATEABLE`   | `'GUARD_FIELD_NOT_UPDATEABLE'`   |
+| `GuardException.ERR_OUT_OF_RANGE`     | `'GUARD_OUT_OF_RANGE'`     | `GuardException.ERR_INVALID_GUARD_ARGUMENT` | `'GUARD_INVALID_ARGUMENT'`       |
+| `GuardException.ERR_ZERO_VALUE`       | `'GUARD_ZERO_VALUE'`       | `GuardException.ERR_EMPTY_COLLECTION`       | `'GUARD_EMPTY_COLLECTION'`       |
 
 </details>
 
@@ -685,34 +696,34 @@ Every guard method on [`Guard.cls`](force-app/main/default/classes/core/Guard.cl
 
 Verified on Salesforce API `v62.0` (Test Run ID `707d200001FsXIn` — **25/25 tests passing**, **100% pass rate**, **1,883 ms** total runtime, including locale-safe `System.runAs` and `Security.stripInaccessible` verification):
 
-| Apex Class | Responsibility | Verified Coverage |
-| :--- | :--- | :---: |
-| [`GuardException.cls`](force-app/main/default/classes/exceptions/GuardException.cls) | Structured exception & `toMap()` serialization | **100%** |
-| [`GuardStringValidator.cls`](force-app/main/default/classes/validators/GuardStringValidator.cls) | String empty/blank/length/regex validation | **100%** |
-| [`GuardSchemaValidator.cls`](force-app/main/default/classes/validators/GuardSchemaValidator.cls) | Opt-in running-user CRUD & FLS guards | **100%** |
-| [`GuardContext.cls`](force-app/main/default/classes/context/GuardContext.cls) | `Quiddity` & Trigger resolution + `LwcScope` + hooks | **99%** |
-| [`Guard.cls`](force-app/main/default/classes/core/Guard.cls) | Public facade entry point | **97%** |
-| [`GuardObjectValidator.cls`](force-app/main/default/classes/validators/GuardObjectValidator.cls) | Object nullability & Boolean state assertions | **97%** |
-| [`GuardCollectionValidator.cls`](force-app/main/default/classes/validators/GuardCollectionValidator.cls) | List, Set & Map covariance validation | **95%** |
-| [`GuardNumericValidator.cls`](force-app/main/default/classes/validators/GuardNumericValidator.cls) | Bounds, inclusive range & non-zero checks | **95%** |
-| [`GuardSObjectValidator.cls`](force-app/main/default/classes/validators/GuardSObjectValidator.cls) | Id parsing, SObjectType & `isSet()` field checks | **94%** |
-| [`GuardRecord.cls`](force-app/main/default/classes/core/GuardRecord.cls) | Fluent Trigger `addError()` & `.skipInaccessible()` builder | **91%** |
-| [`GuardFlowAction.cls`](force-app/main/default/classes/invocable/GuardFlowAction.cls) | Flow & Agentforce `@InvocableMethod` | **83%** |
+| Apex Class                                                                                               | Responsibility                                              | Verified Coverage |
+| :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- | :---------------: |
+| [`GuardException.cls`](force-app/main/default/classes/exceptions/GuardException.cls)                     | Structured exception & `toMap()` serialization              |     **100%**      |
+| [`GuardStringValidator.cls`](force-app/main/default/classes/validators/GuardStringValidator.cls)         | String empty/blank/length/regex validation                  |     **100%**      |
+| [`GuardSchemaValidator.cls`](force-app/main/default/classes/validators/GuardSchemaValidator.cls)         | Opt-in running-user CRUD & FLS guards                       |     **100%**      |
+| [`GuardContext.cls`](force-app/main/default/classes/context/GuardContext.cls)                            | `Quiddity` & Trigger resolution + `LwcScope` + hooks        |      **99%**      |
+| [`Guard.cls`](force-app/main/default/classes/core/Guard.cls)                                             | Public facade entry point                                   |      **97%**      |
+| [`GuardObjectValidator.cls`](force-app/main/default/classes/validators/GuardObjectValidator.cls)         | Object nullability & Boolean state assertions               |      **97%**      |
+| [`GuardCollectionValidator.cls`](force-app/main/default/classes/validators/GuardCollectionValidator.cls) | List, Set & Map covariance validation                       |      **95%**      |
+| [`GuardNumericValidator.cls`](force-app/main/default/classes/validators/GuardNumericValidator.cls)       | Bounds, inclusive range & non-zero checks                   |      **95%**      |
+| [`GuardSObjectValidator.cls`](force-app/main/default/classes/validators/GuardSObjectValidator.cls)       | Id parsing, SObjectType & `isSet()` field checks            |      **94%**      |
+| [`GuardRecord.cls`](force-app/main/default/classes/core/GuardRecord.cls)                                 | Fluent Trigger `addError()` & `.skipInaccessible()` builder |      **91%**      |
+| [`GuardFlowAction.cls`](force-app/main/default/classes/invocable/GuardFlowAction.cls)                    | Flow & Agentforce `@InvocableMethod`                        |      **83%**      |
 
 ---
 
 ## Documentation
 
-| Guide | Topics Covered |
-| :--- | :--- |
-| [Quick How-To Guide: Adding & Using Skills](docs/how-to-use-skills.md) | 30-second install, Antigravity prompts, and pairing ApexGuard with [`masaner/meric-spec`](https://github.com/masaner/meric-spec) |
-| [AI Agent Skills Guide (Antigravity & skills.sh)](docs/ai-agent-skills.md) | Installing on Antigravity (`npx skills add masaner/apex-guard`), [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard), sample prompts, and `skills.sh.json` validation |
-| [AI Agent Skills Catalog](skills/README.md) | 7-skill index and Supported API Surface policy (`skills.sh`) |
-| [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod) |
-| [Execution Contexts & Quiddity Guide](docs/execution-contexts.md) | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()` |
-| [Custom Exceptions & Error Metadata](docs/custom-exceptions.md) | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation |
-| [Project Roadmap](ROADMAP.md) | Phase 1 completion checklist + **Phase 2 plans** (Python `apex-guard-codemod` static-analysis CLI, specialized Flow actions, Nebula Logger adapter) |
-| [Contributing Guide](CONTRIBUTING.md) | Coding conventions, Prettier formatting rules, how to add new validators & tests |
+| Guide                                                                           | Topics Covered                                                                                                                                                                             |
+| :------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Quick How-To Guide: Adding & Using Skills](docs/how-to-use-skills.md)          | 30-second install, Antigravity prompts, and pairing ApexGuard with [`masaner/meric-spec`](https://github.com/masaner/meric-spec)                                                           |
+| [AI Agent Skills Guide (Antigravity & skills.sh)](docs/ai-agent-skills.md)      | Installing on Antigravity (`npx skills add masaner/apex-guard`), [skills.sh/masaner/apex-guard](https://www.skills.sh/masaner/apex-guard), sample prompts, and `skills.sh.json` validation |
+| [AI Agent Skills Catalog](skills/README.md)                                     | 7-skill index and Supported API Surface policy (`skills.sh`)                                                                                                                               |
+| [Engineering Blog: Eliminating the Arrow Anti-Pattern](docs/blog-apex-guard.md) | Architectural deep-dive (architecture, `Quiddity`, LWC `setMessage()`, `isSet()`, CRUD/FLS, and Phase 2 codemod)                                                                           |
+| [Execution Contexts & Quiddity Guide](docs/execution-contexts.md)               | `System.Quiddity` routing, `AuraHandledException.setMessage()`, Trigger `addError()`, Flow `Quiddity` nuances, `SObject.isSet()`                                                           |
+| [Custom Exceptions & Error Metadata](docs/custom-exceptions.md)                 | Custom message & `Exception` overloads, `GuardException.toMap()`, error constants, global exception translation                                                                            |
+| [Project Roadmap](ROADMAP.md)                                                   | Phase 1 completion checklist + **Phase 2 plans** (Python `apex-guard-codemod` static-analysis CLI, specialized Flow actions, Nebula Logger adapter)                                        |
+| [Contributing Guide](CONTRIBUTING.md)                                           | Coding conventions, Prettier formatting rules, how to add new validators & tests                                                                                                           |
 
 ---
 
