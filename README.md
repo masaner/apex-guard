@@ -47,13 +47,7 @@ Enterprise Apex codebases quickly accumulate defensive `if/else` pyramids (the *
 
 **ApexGuard**—inspired by Microsoft's `.NET CommunityToolkit.Diagnostics.Guard`—replaces boilerplate defensive branching with a single, positive-assertion `Guard` facade featuring **zero external dependencies**, **zero SOQL/DML**, and **universal runtime awareness**.
 
-<div align="center">
-  <a href="https://github.com/masaner/apex-guard/releases/download/v1.0.0/apexguard-github-under-10mb.mp4">
-    <img src="./assets/video-player-preview.png" alt="Watch the 45-second ApexGuard Demo Video (With Audio)" width="100%" />
-  </a>
-  <br />
-  <sub><strong>▶ Click to play/download the 45-second HD walkthrough with audio</strong> (<code>apexguard-github-under-10mb.mp4</code>)</sub>
-</div>
+https://github.com/user-attachments/assets/60c4c015-3dba-4304-bfbf-4325bcb816db
 
 <table>
 <tr>
