@@ -248,8 +248,9 @@ sf apex run test \
 Paste this script into **Developer Console → Debug → Open Execute Anonymous Window** right after installing:
 
 ```apex
-// 1. Happy Path: Pass-through validation & opt-in schema check
+// 1. Happy Path: Pass-through validation, LWC pass-through & opt-in schema check
 String company = Guard.isNotBlank('Acme Corp', 'company');
+String searchKey = Guard.forLwc().isNotBlank('Lightning', 'searchKey');
 Decimal discount = Guard.isInRange(15.5, 0, 50, 'discount');
 Id sampleAccId = Guard.isIdOfType(
     Guard.isValidId('001000000000000AAA', 'sampleAccId'),
@@ -258,7 +259,7 @@ Id sampleAccId = Guard.isIdOfType(
 );
 Guard.isAccessible(Account.SObjectType);
 Guard.isFieldAccessible(Account.Name);
-System.debug('1. Happy path passed: ' + company + ' | discount=' + discount + ' | id=' + sampleAccId);
+System.debug('1. Happy path passed: ' + company + ' | searchKey=' + searchKey + ' | discount=' + discount + ' | id=' + sampleAccId);
 
 // 2. Fail-Fast GuardException + Structured JSON Metadata (Quiddity = ANONYMOUS)
 try {
@@ -274,12 +275,15 @@ GuardRecord recCheck = Guard.onRecord(invalidAcc)
     .isGreaterThan(Account.NumberOfEmployees, 0);
 System.debug('3. GuardRecord hasErrors=' + recCheck.hasErrors() + ' | errors=' + recCheck.getErrorMessages());
 
-// 4. LWC Mode (AuraHandledException with setMessage() populated)
-try {
-    Guard.forLwc().isNotBlank('', 'searchKey');
-} catch (AuraHandledException auraEx) {
-    System.debug('4. Caught AuraHandledException message: ' + auraEx.getMessage());
-}
+// 4. Flow & Agentforce Invocable Action (Decision-Routing Mode: throwOnFailure = false)
+GuardFlowAction.Request flowReq = new GuardFlowAction.Request();
+flowReq.rule = 'IS_GREATER_THAN';
+flowReq.paramName = 'AnnualRevenue';
+flowReq.numericValue = -500;
+flowReq.minValue = 0;
+flowReq.throwOnFailure = false;
+GuardFlowAction.Result flowRes = GuardFlowAction.validate(new List<GuardFlowAction.Request>{ flowReq })[0];
+System.debug('4. Flow Action isValid=' + flowRes.isValid + ' | code=' + flowRes.errorCode + ' | msg=' + flowRes.errorMessage);
 ```
 
 </details>
